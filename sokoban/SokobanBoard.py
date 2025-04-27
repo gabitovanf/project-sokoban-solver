@@ -62,10 +62,20 @@ class SokobanBoard(AbstractBoard):
         if -1 == player_position:
             return 'Board does not contain a player!'
         
-        # TODO: check available cells (active) first
+        edge_is_not_reachable = True
+        def check_if_edge_reached_and_set_active(reached_position):
+            nonlocal edge_is_not_reachable
+
+            board._set_active_cell(reached_position)
+            
+            if edge_is_not_reachable and board.is_edge(reached_position):
+                edge_is_not_reachable = False
 
         searcher = SokobanSolver(board)
-        searcher.bfs(player_position, lambda reached_position: board._set_active_cell(reached_position))
+        searcher.bfs(player_position, check_if_edge_reached_and_set_active)
+
+        if not edge_is_not_reachable:
+            return 'Player may walk outside the board'
 
         # Count boxes and goals:
         board._count_boxes_and_goals(update_all=True)
