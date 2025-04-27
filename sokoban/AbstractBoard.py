@@ -11,6 +11,7 @@ class AbstractBoard:
 
         # Optional to use
         self._player_position = -1
+        self._stored_state_clone = None
 
         # INFO
         self._title = 'No Name'
@@ -36,6 +37,45 @@ class AbstractBoard:
 
     def element_index(self, x_index: int, y_index: int) -> int:
         return y_index * self.width + x_index
+
+    # def element_coords(self, index: int) -> int:
+    #     return self.element_x(index), self.element_y(index)
+
+    # def element_x(self, index: int) -> int:
+    #     return int(index % self.width)
+
+    # def element_y(self, index: int) -> int:
+    #     return int(index / self.width)
+
+    def clone(self):
+        board = self.__class__(self.width, self.height)
+
+        board.title = self.title
+        board.level = self.level
+        board.level_set = self.level_set
+        AbstractBoard._copy_state_from_to(self, board)
+        
+        return board
+    
+    def store_state(self):
+        self._stored_state_clone = self.clone()
+    
+    def clear_stored_state(self):
+        self._stored_state_clone = None
+    
+    def restore_state(self):
+        if self._stored_state_clone is None:
+            return False
+        
+        AbstractBoard._copy_state_from_to(self._stored_state_clone, self)
+
+        return True
+    
+    @staticmethod
+    def _copy_state_from_to(from_board, to_board):
+        to_board.player_position = from_board.player_position
+        for (i, elem) in enumerate(from_board._elements):
+            to_board._elements[i] = elem
 
     @property
     def elements(self):

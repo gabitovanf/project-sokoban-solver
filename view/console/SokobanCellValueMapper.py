@@ -30,7 +30,5 @@ class SokobanCellValueMapper(AbstractValueMapper):
         elif value & 4 != 0:
             symbols = [SokobanCellValueMapper.GOAL, SokobanCellValueMapper.PLAYER_ON_GOAL]
 
-        print(value, player_is_on, '-> ', symbols)
-
         # add some space with ' ' 
         return symbols[player_is_on] + ' '

@@ -8,6 +8,25 @@ class SokobanBoard(AbstractBoard):
         self._num_goals = 0
         self._num_boxes_on_goals = 0
 
+    def clone(self):
+        board = super(SokobanBoard, self).clone()
+        board._num_boxes = self._num_boxes
+        board._num_goals = self._num_goals
+        board._num_boxes_on_goals = self._num_boxes_on_goals
+
+        return board
+
+    def restore_state(self):
+        result = super(SokobanBoard, self).restore_state()
+
+        if result:
+            clone = self._stored_state_clone
+            self._num_boxes = clone._num_boxes
+            self._num_goals = clone._num_goals
+            self._num_boxes_on_goals = clone._num_boxes_on_goals
+
+        return result
+
     @staticmethod
     def create_from_str(input_str):
         lines = list(filter(lambda l: '#' in l, input_str.split('\n')))
@@ -195,3 +214,4 @@ class SokobanBoard(AbstractBoard):
     @property
     def num_boxes_on_goals(self):
         return self._num_boxes_on_goals
+    
