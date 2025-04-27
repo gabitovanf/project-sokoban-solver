@@ -11,6 +11,9 @@ class SokobanSinglePlayerMode:
         self._parse_single_agent_positions(sequence)
 
     def update(self):
+        if self._player.sequence_queue.is_empty:
+            return
+        
         move = self._player.sequence_queue.dequeue()
         self._board.player_position = self._board.element_index(move[0], move[1])
 

@@ -38,11 +38,43 @@ class AbstractBoard:
     def element_index(self, x_index: int, y_index: int) -> int:
         return y_index * self.width + x_index
 
+    def get_neighbors(self, element_index: int) -> int:
+        elements = set()
+
+        if not self.is_top_edge(element_index):
+            elements.add(element_index + self._width)
+        if not self.is_right_edge(element_index):
+            elements.add(element_index + 1)
+        if not self.is_bottom_edge(element_index):
+            elements.add(element_index - self._width)
+        if not self.is_left_edge(element_index): 
+            elements.add(element_index - 1)
+
+        return elements
+
+    def is_edge(self, element_index: int) -> int:
+        return (self.is_bottom_edge(element_index)
+                or self.is_top_edge(element_index)
+                or self.is_left_edge(element_index) 
+                or self.is_right_edge(element_index))
+
+    def is_top_edge(self, element_index: int) -> int:
+        return element_index > self._size - self._width - 1
+
+    def is_bottom_edge(self, element_index: int) -> int:
+        return element_index < self._width
+
+    def is_left_edge(self, element_index: int) -> int:
+        return self._element_x(element_index) < 1
+
+    def is_right_edge(self, element_index: int) -> int:
+        return self._element_x(element_index) > self._width - 2
+    
     # def element_coords(self, index: int) -> int:
     #     return self.element_x(index), self.element_y(index)
 
-    # def element_x(self, index: int) -> int:
-    #     return int(index % self.width)
+    def _element_x(self, index: int) -> int:
+        return int(index % self.width)
 
     # def element_y(self, index: int) -> int:
     #     return int(index / self.width)

@@ -10,8 +10,8 @@ class SokobanMoveSequencePlayer(AbstractSequencePlayer):
     def __init__(self, board: SokobanBoard):
         super().__init__()
         self._board = board
-        self._mode = 'none'
-        self._mode_helper = None
+        self._mode = SokobanMoveSequencePlayer.MODE_SINGLE_AGENT_POSITION
+        self._mode_helper = SokobanSinglePlayerMode(self, self._board)
 
     def play(self, sequence: str, mode: str = 'single'):
         super(SokobanMoveSequencePlayer, self).play(sequence)

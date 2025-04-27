@@ -2,7 +2,8 @@ from view.AbstractValueMapper import AbstractValueMapper
 
 
 class SokobanCellValueMapper(AbstractValueMapper):
-    EMPTY = ' '
+    # EMPTY = ' '
+    EMPTY = '.'
     WALL = '#'
     BOX = '*'
     GOAL = 'o'

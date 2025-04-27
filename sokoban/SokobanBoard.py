@@ -29,6 +29,8 @@ class SokobanBoard(AbstractBoard):
 
     @staticmethod
     def create_from_str(input_str):
+        from sokoban.SokobanSolver import SokobanSolver
+
         lines = list(filter(lambda l: '#' in l, input_str.split('\n')))
 
         height = len(lines)
@@ -60,7 +62,11 @@ class SokobanBoard(AbstractBoard):
         if -1 == player_position:
             return 'Board does not contain a player!'
         
-        # TODO: check available cells first
+        # TODO: check available cells (active) first
+
+        searcher = SokobanSolver(board)
+        searcher.bfs(player_position, lambda reached_position: board._set_active_cell(reached_position))
+
         # Count boxes and goals:
         board._count_boxes_and_goals(update_all=True)
 
@@ -177,6 +183,9 @@ class SokobanBoard(AbstractBoard):
     def _set_dead_cell(self, index):
         self._elements[index] |= 32
     
+    def _set_active_cell(self, index):
+        self._elements[index] |= 8
+    
     # Elements states check
     def _is_wall(self, index):
         return (self._elements[index] & 2) != 0
@@ -214,4 +223,25 @@ class SokobanBoard(AbstractBoard):
     @property
     def num_boxes_on_goals(self):
         return self._num_boxes_on_goals
+    
+    def get_neighbors(self, element_index):
+        # elements = super().get_neighbors(element_index)
+        # for index in elements:
+        #     if self._is_wall(index):
+        #         elements.discard(index)
+
+        elements = set()
+
+        if not self.is_top_edge(element_index) and not self._is_wall(element_index + self._width):
+            elements.add(element_index + self._width)
+        if not self.is_right_edge(element_index) and not self._is_wall(element_index + 1):
+            elements.add(element_index + 1)
+        if not self.is_bottom_edge(element_index) and not self._is_wall(element_index - self._width):
+            elements.add(element_index - self._width)
+        if not self.is_left_edge(element_index) and not self._is_wall(element_index - 1): 
+            elements.add(element_index - 1)
+
+        return elements
+
+        return elements
     

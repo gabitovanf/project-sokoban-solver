@@ -2,7 +2,7 @@ from pynput import keyboard
 from time import sleep
 
 from view.console.ConsoleBoardView import ConsoleBoardView
-from view.console.SokobanCellValueMapper import SokobanCellValueMapper
+from view.console.SokobanCellValueAndStateMapper import SokobanCellValueAndStateMapper
 from view.helper.BoardViewTesterData import BoardViewTesterData
 from utils.Ticker import Ticker
 from sokoban.SokobanBoard import SokobanBoard
@@ -33,7 +33,7 @@ def main():
     # board_sokoban.store_state()
 
     ticker = Ticker(10, True)
-    board_view = ConsoleBoardView(board_sokoban, SokobanCellValueMapper())
+    board_view = ConsoleBoardView(board_sokoban, SokobanCellValueAndStateMapper())
     solver = SokobanSolver(board_sokoban)
     move_player = SokobanMoveSequencePlayer(board_sokoban)
 
@@ -57,5 +57,5 @@ keyboard.Listener.start
 main()
 
 # cd project-sokoban-solver
-# python3 SokobanApp.pynt= ' 'r r alse  
+# python3 SokobanApp.py  
  

@@ -18,7 +18,7 @@ class ConsoleBoardView(AbstractBoardView):
     WHITE = 7
     DEFAULT = 9
 
-    _REST_COLORS_CMD = '\x1b[0m'
+    REST_COLORS_CMD = '\x1b[0m'
 
     def __init__(self, source: AbstractBoardData, value_mapper: AbstractValueMapper=None, *args, **kwargs):
         kwargs['value_mapper'] = value_mapper
@@ -41,16 +41,16 @@ class ConsoleBoardView(AbstractBoardView):
             line_break_index -= w
 
         print(
-            '\033[K' + ''.join(output) + ConsoleBoardView._REST_COLORS_CMD, 
+            '\033[K' + ''.join(output) + ConsoleBoardView.REST_COLORS_CMD, 
             end='\033[F' * (h - 1), 
             flush=True
         )
     
     @staticmethod
-    def _set_text_color_cmd(color_index: int):
-        return ConsoleBoardView._set_color_cmd(30 + color_index)
+    def set_text_color_cmd(color_index: int):
+        return ConsoleBoardView.set_color_cmd(30 + color_index)
     
     @staticmethod
-    def _set_color_cmd(cmd_int: int):
+    def set_color_cmd(cmd_int: int):
         return '\x1b[' + str(cmd_int) + 'm'
     
