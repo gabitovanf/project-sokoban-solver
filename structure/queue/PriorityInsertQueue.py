@@ -21,8 +21,14 @@ class PriorityInsertQueue:
         pairArray = None
 
         index_new_or_old = PriorityInsertQueue._binary_search(self.__priorityArray, newPriority)
+        
 
-        if newPriority != self.__priorityArray.get(index_new_or_old):
+        if (self.__highestPriority < 0 
+            or index_new_or_old > self.__priorityArray.size() - 1
+            or (self.__priorityArray.get(index_new_or_old) is not None 
+                and newPriority != self.__priorityArray.get(index_new_or_old).get(0)
+                )
+            ):
             queueArray = FactorArray()
             pairArray = VectorArray(None, 2)
             pairArray.put(newPriority)
@@ -32,6 +38,7 @@ class PriorityInsertQueue:
             if self.__highestPriority < newPriority:
                 self.__highestPriority = newPriority
         else:
+            print(index_new_or_old, self.__priorityArray.size())
             pairArray = self.__priorityArray.get(index_new_or_old)
             queueArray = pairArray.get(1)
 
@@ -70,26 +77,30 @@ class PriorityInsertQueue:
         if start < 0: start = 0
         if end < 0: end = array.size() - 1
 
+
         if end <= start:
-            if priority > array.get(start):
+            print(start, end)
+            if array.size() < 1:
+                return 0
+            if priority > array.get(start).get(0):
                 return start + 1
             # We'll use item that we already have
-            elif priority == array.get(start):
+            if priority == array.get(start).get(0):
                 return start
-            else:
-                return start
+    
+            return start
             
         mid = int(math.ceil((start + end) / 2))
-        if priority >= array.get(mid):
+        if priority >= array.get(mid).get(0):
             return PriorityInsertQueue._binary_search(array, priority, start=mid, end=end)
         
         return PriorityInsertQueue._binary_search(array, priority, start=start, end=mid - 1)
         
 
     def __str__(self) -> str:
-        return ('PriorityMatrixQueue: [' + ', \n'.join(list(map(
-            lambda x: '[{p}, {val}]'.format(p=x[0], val=x[1]),
+        return ('PriorityInsertQueue: [' + ', \n'.join(list(map(
+            lambda x: '[{p}, {val}]'.format(p=x.get(0), val=x.get(1)),
             # lambda x: str(x),
-            enumerate(self.__priorityArray)
+            self.__priorityArray
         ))) + ']')
 
