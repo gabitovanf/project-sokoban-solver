@@ -1,7 +1,8 @@
-from sokoban.AbstractBoard import AbstractBoard
+from sokoban.board.AbstractArrayBoard import AbstractArrayBoard
+from sokoban.board.MoveDirection import MoveDirection
 
 
-class SokobanBoard(AbstractBoard):
+class SokobanBoard(AbstractArrayBoard):
     def __init__(self, width, height):
         super().__init__(width, height, 16)
         self._num_boxes = 0
@@ -29,7 +30,7 @@ class SokobanBoard(AbstractBoard):
 
     @staticmethod
     def create_from_str(input_str):
-        from sokoban.SokobanSolver import SokobanSolver
+        from sokoban.GraphSearch import GraphSearch
 
         lines = list(filter(lambda l: '#' in l, input_str.split('\n')))
 
@@ -67,33 +68,34 @@ class SokobanBoard(AbstractBoard):
             nonlocal edge_is_not_reachable
 
             board._set_active_cell(reached_position)
-            
+
             if edge_is_not_reachable and board.is_edge(reached_position):
                 edge_is_not_reachable = False
 
-        searcher = SokobanSolver(board)
-        searcher.bfs(player_position, check_if_edge_reached_and_set_active)
+        GraphSearch.BFS(board, player_position, check_if_edge_reached_and_set_active, lambda x: False)
 
         if not edge_is_not_reachable:
             return 'Player may walk outside the board'
 
         # Count boxes and goals:
-        board._count_boxes_and_goals(update_all=True)
+        result = board._count_boxes_and_goals(count_box_on_goal_only=True)
+        num_boxes = result.get('boxes')
+        num_goals = result.get('goals')
 
-        if board.num_boxes < 0:
+        if num_boxes < 0:
             return 'There is no box on the puzzle'
 
-        if board.num_goals < 0:
+        if num_goals < 0:
             return 'There is no goal on the puzzle'
 
-        if board.num_boxes != board.num_goals:
-            return 'The Number of boxes and goals don\'t match! boxes: {0} but goals: {1}'.format(board.num_boxes, board.num_goals)
+        if num_boxes != num_goals:
+            return 'The Number of boxes and goals don\'t match! boxes: {0} but goals: {1}'.format(num_boxes, num_goals)
 
         return board
 
     @staticmethod
     def create_from_json_encoded(input_str: str):
-        decoded_json_dict = AbstractBoard.parse_json_encoded(input_str)
+        decoded_json_dict = AbstractArrayBoard.parse_json_encoded(input_str)
 
         board = SokobanBoard.create_from_str('\n'.join(decoded_json_dict.get('Board', [])))
 
@@ -139,7 +141,7 @@ class SokobanBoard(AbstractBoard):
         self._num_goals = 0
         self._num_boxes_on_goals = 0
     
-    def _count_boxes_and_goals(self, update_all = False):
+    def _count_boxes_and_goals(self, count_box_on_goal_only = False):
         num_boxes = 0
         num_goals = 0
         num_boxes_on_goals = 0
@@ -153,7 +155,7 @@ class SokobanBoard(AbstractBoard):
 
                 continue
 
-            if not update_all:
+            if not count_box_on_goal_only:
                 continue
 
             if self._is_box(elem_index):
@@ -168,9 +170,11 @@ class SokobanBoard(AbstractBoard):
 
 
         self._num_boxes_on_goals = num_boxes_on_goals
-        if update_all:
+        if count_box_on_goal_only:
             self._num_boxes = num_boxes
             self._num_goals = num_goals
+
+        return { 'boxes': num_boxes, 'goals': num_goals, 'boxes_on_goals': num_boxes_on_goals }
 
     
     # Elements setters
@@ -196,27 +200,39 @@ class SokobanBoard(AbstractBoard):
     def _set_active_cell(self, index):
         self._elements[index] |= 8
     
+    def _clear_box(self, index):
+        self._elements[index] ^= 1
+    
     # Elements states check
     def _is_wall(self, index):
         return (self._elements[index] & 2) != 0
     
-    def _is_goal(self, index, hard = False):
+    def _is_goal(self, index, hard = False): # TODO: hard ???
         return (self._elements[index] & 4) != 0
     
     def _is_box(self, index):
-        return (self._elements[index] & 1) != 0
+        return self._is_box_2(self._elements[index])
     
     def _is_box_on_goal(self, index):
+        return self._is_box_on_goal_2(self._elements[index])
+    
+    def _is_box_2(self, element):
+        return (element & 1) != 0
+    
+    def _is_box_on_goal_2(self, element):
         mask = 0
         mask |= 1 # box
         mask |= 4 # goal
-        return (self._elements[index] & mask) == mask
+        return (element & mask) == mask
     
     def _is_box_or_wall(self, index):
         mask = 0
         mask |= 1 # box
         mask |= 2 # wall
         return (self._elements[index] & mask) != 0
+    
+    def _is_active(self, index):
+        return (self._elements[index] & 8) != 0
     
     def _is_dead_cell(self, index):
         return (self._elements[index] & 32) != 0
@@ -233,25 +249,85 @@ class SokobanBoard(AbstractBoard):
     @property
     def num_boxes_on_goals(self):
         return self._num_boxes_on_goals
-    
-    def get_neighbors(self, element_index):
+
+    def get_neighbors(self, element_index) -> list:
         # elements = super().get_neighbors(element_index)
         # for index in elements:
         #     if self._is_wall(index):
         #         elements.discard(index)
 
-        elements = set()
+        elements = []
 
-        if not self.is_top_edge(element_index) and not self._is_wall(element_index + self._width):
-            elements.add(element_index + self._width)
+        if not self.is_top_edge(element_index) and not self._is_wall(element_index - self._width):
+            elements.append(element_index - self._width)
         if not self.is_right_edge(element_index) and not self._is_wall(element_index + 1):
-            elements.add(element_index + 1)
-        if not self.is_bottom_edge(element_index) and not self._is_wall(element_index - self._width):
-            elements.add(element_index - self._width)
+            elements.append(element_index + 1)
+        if not self.is_bottom_edge(element_index) and not self._is_wall(element_index + self._width):
+            elements.append(element_index + self._width)
         if not self.is_left_edge(element_index) and not self._is_wall(element_index - 1): 
-            elements.add(element_index - 1)
-
-        return elements
+            elements.append(element_index - 1)
 
         return elements
     
+    def is_solution(self, stamp: tuple) -> bool:
+        elements, _, _, _ = stamp
+        has_box_out_of_goal = False
+
+        for element in elements:
+            if self._is_box_2(element) and not self._is_box_on_goal_2(element):
+                has_box_out_of_goal = True
+                break
+
+        return not has_box_out_of_goal
+
+
+    # PLAYING
+    def _get_move_delta(self, direction: int):
+        if direction == MoveDirection.UP:
+            return -self._width
+        if direction == MoveDirection.DOWN:
+            return self._width
+        if direction == MoveDirection.RIGHT:
+            return 1
+        if direction == MoveDirection.LEFT:
+            return -1
+        return 0
+        
+    def can_move(self, direction: int) -> bool:
+        delta = self._get_move_delta(direction)
+        # print('direction', direction, 'delta', delta)
+
+        if abs(delta) < 1:
+            return False
+
+        new_player_position = self.player_position 
+        # print(delta, 'to', new_player_position)
+        new_player_position += delta
+
+        if not self._is_active(new_player_position):
+            return False
+
+        if self._is_box(new_player_position):
+            return not self._is_box_or_wall(new_player_position + delta)
+
+        return True
+
+    # Validate move before calling move
+    def move(self, direction: int):
+        delta = self._get_move_delta(direction)
+
+        new_player_position = self.player_position 
+        new_player_position += delta
+
+        if self._is_box(new_player_position):
+            # Move a box
+            self._clear_box(new_player_position)
+            self._set_box(new_player_position + delta)
+
+        # print('SET', new_player_position)
+        self.player_position = new_player_position
+        self._move_level += 1
+        self._move_id = self._get_next_move_id()
+
+
+

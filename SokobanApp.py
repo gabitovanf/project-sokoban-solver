@@ -5,12 +5,24 @@ from view.console.ConsoleBoardView import ConsoleBoardView
 from view.console.SokobanCellValueAndStateMapper import SokobanCellValueAndStateMapper
 from view.helper.BoardViewTesterData import BoardViewTesterData
 from utils.Ticker import Ticker
-from sokoban.SokobanBoard import SokobanBoard
-from sokoban.SokobanSolver import SokobanSolver
+from sokoban.board.SokobanBoard import SokobanBoard
+from sokoban.board.MoveDirection import MoveDirection
+from sokoban.solver.SokobanSolver import SokobanSolver
 from sokoban.control.SokobanMoveSequencePlayer import SokobanMoveSequencePlayer
 
 
 # level_json_str = 'ew0KICAiQm9hcmQiOiBbDQogICIgICAjIyMiLA0KICAiICAjIyAjICMjIyMiLA0KICAiICMjICAjIyMgICMiLA0KICAiIyMgJCAgICAgICMiLA0KICAiIyAgIEAkICMgICMiLA0KICAiIyMjICQjIyMgICMiLA0KICAiICAjICAjLi4gICMiLA0KICAiICMjICMjLiMgIyMiLA0KICAiICMgICAgICAjIyIsDQogICIgIyAgICAgIyMiLA0KICAiICMjIyMjIyMiDQogIF0sDQogICJMZXZlbCBTZXQiOiAiU29sdmVyIFN0YXRpc3RpY3MgTGV2ZWwiLA0KICAiTGV2ZWwgVGl0bGUiOiAiU2FzcXVhdGNoIHwgTGV2ZWwgMSIsDQogICJMZXZlbCBOby4iOiAxDQp9'
+
+# SUPER SIMPLE MAZE. ONE BOX
+# level_str = '\n'.join([
+#     '##########',
+#     '#-------@#',
+#     '#-------$#',
+#     '#--------#',
+#     '#-------.#',
+#     '##########'
+# ])
+# SIMPLE I. ONE BOX
 level_str = '\n'.join([
     '##########',
     '#--------#',
@@ -19,9 +31,51 @@ level_str = '\n'.join([
     '#-------.#',
     '##########'
 ])
+# SIMPLE II. ONE BOX
+# level_str = '\n'.join([
+#     '##########',
+#     '#--------#',
+#     '#-@----$-#',
+#     '#------#-#',
+#     '#------#.#',
+#     '##########'
+# ])
+# SIMPLE III.v1. ONE BOX
+# BFS failed - 15 attempt levels
+# DFS failed - 15 attempt levels
+# level_str = '\n'.join([
+#     '##########',
+#     '#--------#',
+#     '#-@----$-#',
+#     '#------###',
+#     '#-------.#',
+#     '##########'
+# ])
+# SIMPLE III.v2. ONE BOX
+# BFS succeeded - 10 attempt levels
+# DFS succeeded - 14 attempt levels
+# level_str = '\n'.join([
+#     '##########',
+#     '#-------@#',
+#     '#------$-#',
+#     '#------###',
+#     '#-------.#',
+#     '##########'
+# ])
+# SIMPLE. TOW BOXS
+# BFS failed - 15 attempt levels
+# level_str = '\n'.join([
+#     '##########',
+#     '#--------#',
+#     '#-@----$-#',
+#     '#--$----.#',
+#     '#-------.#',
+#     '##########'
+# ])
+test_player_moves = '1 1, 1 2, 2 2, 2 3, 3 3, 3 4, 4 4'
 
 def main():
-    # board_tester = BoardViewTesterData(10, 10)
+    # board_tester = BoardViewTesterData(10, 10) # elements
     # board_sokoban = SokobanBoard.create_from_json_encoded(level_str)
     board_sokoban = SokobanBoard.create_from_str(level_str)
 
@@ -29,31 +83,45 @@ def main():
         print(board_sokoban)
 
         return False
-    
-    # board_sokoban.store_state()
 
-    ticker = Ticker(10, True)
+    ticker = Ticker(5, True)
     board_view = ConsoleBoardView(board_sokoban, SokobanCellValueAndStateMapper())
-    solver = SokobanSolver(board_sokoban)
+    solver = SokobanSolver()
     move_player = SokobanMoveSequencePlayer(board_sokoban)
 
-    solver.a_star(board_sokoban.element_index(9, 5))
+    # Store InitialState
+    board_sokoban.store_state()
 
+    # success, actions_stack, result_player_position_str, result_level = solver.BFS(board_sokoban)
+    # success, actions_stack, result_player_position_str, result_level = solver.DFS_first_node_met(board_sokoban, 20)
+    success, actions_stack, result_player_position_str, result_level = solver.DFS(board_sokoban, 20)
+    # solver.a_star(board_sokoban.element_index(9, 5))
+
+    board_sokoban.restore_state()
+
+    print('\nSUCCESS' if success else 'FAILED')
+    print(actions_stack, result_player_position_str)
+    print('FOUND AT LEVEL', result_level)
     print('\n')
     board_view.render()
-    # move_player.play('1 1, 1 2, 2 2, 2 3, 3 3, 3 4, 4 4')
+    move_player.play(actions_stack, SokobanMoveSequencePlayer.MODE_ACTION)
+    # TEST player's moves only
+    # move_player.play(result_player_position_str)
 
     def update():
         # board_tester.update()
+
+        # if board_sokoban.can_move(MoveDirection.UP):
+        #     board_sokoban.move(MoveDirection.UP)
+
         move_player.update()
         board_view.render()
 
     ticker.register_observer_func(update)
 
     ticker.start()
-    
+
 # START:
-keyboard.Listener.start
 main()
 
 # cd project-sokoban-solver

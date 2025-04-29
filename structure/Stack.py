@@ -1,12 +1,12 @@
-class Queue:
+class Stack:
     def __init__(self):
         self._items = []
 
-    def enqueue(self, item):
+    def push(self, item):
         self._items.append(item)
 
-    def dequeue(self):
-        return self._items.pop(0)
+    def pop(self):
+        return self._items.pop()
 
     @property
     def is_empty(self):

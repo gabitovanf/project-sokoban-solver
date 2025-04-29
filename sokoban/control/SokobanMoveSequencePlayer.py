@@ -1,11 +1,12 @@
-from sokoban.SokobanBoard import SokobanBoard
+from sokoban.board.SokobanBoard import SokobanBoard
 from sokoban.control.modes.SokobanSinglePlayerMode import SokobanSinglePlayerMode
+from sokoban.control.modes.SokobanActionMode import SokobanActionMode
 from sokoban.control.AbstractSequencePlayer import AbstractSequencePlayer
-from structure.Queue import Queue
 
 
 class SokobanMoveSequencePlayer(AbstractSequencePlayer):
     MODE_SINGLE_AGENT_POSITION = 'single'
+    MODE_ACTION = 'action'
 
     def __init__(self, board: SokobanBoard):
         super().__init__()
@@ -13,9 +14,9 @@ class SokobanMoveSequencePlayer(AbstractSequencePlayer):
         self._mode = SokobanMoveSequencePlayer.MODE_SINGLE_AGENT_POSITION
         self._mode_helper = SokobanSinglePlayerMode(self, self._board)
 
-    def play(self, sequence: str, mode: str = 'single'):
-        super(SokobanMoveSequencePlayer, self).play(sequence)
-        self.clear_queue()
+    def play(self, record, mode: str = 'single'):
+        super(SokobanMoveSequencePlayer, self).play(record)
+        self.clear()
 
         if mode != self._mode:
             self._mode = mode
@@ -23,7 +24,10 @@ class SokobanMoveSequencePlayer(AbstractSequencePlayer):
             if mode == SokobanMoveSequencePlayer.MODE_SINGLE_AGENT_POSITION:
                 self._mode_helper = SokobanSinglePlayerMode(self, self._board)
 
-        self._mode_helper.fill_queue(sequence)
+            elif mode == SokobanMoveSequencePlayer.MODE_ACTION:
+                self._mode_helper = SokobanActionMode(self, self._board)
+
+        self._mode_helper.setup(record)
 
     def update(self):
         self._mode_helper.update()

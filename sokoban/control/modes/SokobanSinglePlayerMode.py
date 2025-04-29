@@ -1,5 +1,5 @@
 from sokoban.control.AbstractSequencePlayer import AbstractSequencePlayer
-from sokoban.SokobanBoard import SokobanBoard
+from sokoban.board.SokobanBoard import SokobanBoard
 
 
 class SokobanSinglePlayerMode:
@@ -7,24 +7,24 @@ class SokobanSinglePlayerMode:
         self._player = player
         self._board = board
 
-    def fill_queue(self, sequence: str):
-        self._parse_single_agent_positions(sequence)
+    def setup(self, sequence):
+        self._parse_single_agent_positions(str(sequence))
 
     def update(self):
-        if self._player.sequence_queue.is_empty:
+        if self._player.is_empty:
             return
         
-        move = self._player.sequence_queue.dequeue()
+        move = self._player.next()
         self._board.player_position = self._board.element_index(move[0], move[1])
 
     def _parse_single_agent_positions(self, sequence: str):
         i = (sequence
              .strip()
-             .find(','))
+             .rfind(','))
         while len(sequence) > 0 and i > 0:
-            point_str = sequence[0:i]
-            sequence = sequence[(i + 1):].strip()
-            i = sequence.find(',')
+            point_str = sequence[(i + 1):].strip()
+            sequence = sequence[0:i].strip()
+            i = sequence.rfind(',')
 
             if not ' ' in point_str:
                 continue
@@ -33,5 +33,5 @@ class SokobanSinglePlayerMode:
             x = float(point_str[0:j].strip())
             y = float(point_str[j:].strip())
 
-            self._player.sequence_queue.enqueue((x, y))
+            self._player.push((x, y))
             

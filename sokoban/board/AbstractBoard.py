@@ -1,13 +1,12 @@
 import json
 from sokoban.utils.UrlStringEncoder import UrlStringEncoder
+from sokoban.ISearchGraph import ISearchGraph
 
-class AbstractBoard:
+class AbstractBoard(ISearchGraph):
     def __init__(self, width: int, height: int, fill_with=0):
-        size = width * height
         self._width = width
         self._height = height
-        self._size = size
-        self._elements = [] if size < 1 else list(map(lambda a: fill_with, range(size)))
+        self._size = width * height
 
         # Optional to use
         self._player_position = -1
@@ -39,16 +38,16 @@ class AbstractBoard:
         return y_index * self.width + x_index
 
     def get_neighbors(self, element_index: int) -> int:
-        elements = set()
+        elements = []
 
         if not self.is_top_edge(element_index):
-            elements.add(element_index + self._width)
+            elements.append(element_index - self._width)
         if not self.is_right_edge(element_index):
-            elements.add(element_index + 1)
+            elements.append(element_index + 1)
         if not self.is_bottom_edge(element_index):
-            elements.add(element_index - self._width)
+            elements.append(element_index + self._width)
         if not self.is_left_edge(element_index): 
-            elements.add(element_index - 1)
+            elements.append(element_index - 1)
 
         return elements
 
@@ -58,26 +57,26 @@ class AbstractBoard:
                 or self.is_left_edge(element_index) 
                 or self.is_right_edge(element_index))
 
-    def is_top_edge(self, element_index: int) -> int:
+    def is_bottom_edge(self, element_index: int) -> int:
         return element_index > self._size - self._width - 1
 
-    def is_bottom_edge(self, element_index: int) -> int:
+    def is_top_edge(self, element_index: int) -> int:
         return element_index < self._width
 
     def is_left_edge(self, element_index: int) -> int:
-        return self._element_x(element_index) < 1
+        return self.element_x(element_index) < 1
 
     def is_right_edge(self, element_index: int) -> int:
-        return self._element_x(element_index) > self._width - 2
+        return self.element_x(element_index) > self._width - 2
     
     # def element_coords(self, index: int) -> int:
     #     return self.element_x(index), self.element_y(index)
 
-    def _element_x(self, index: int) -> int:
+    def element_x(self, index: int) -> int:
         return int(index % self.width)
 
-    # def element_y(self, index: int) -> int:
-    #     return int(index / self.width)
+    def element_y(self, index: int) -> int:
+        return int(index / self.width)
 
     def clone(self):
         board = self.__class__(self.width, self.height)
@@ -85,7 +84,7 @@ class AbstractBoard:
         board.title = self.title
         board.level = self.level
         board.level_set = self.level_set
-        AbstractBoard._copy_state_from_to(self, board)
+        self._copy_state_from_to(self, board)
         
         return board
     
@@ -99,19 +98,12 @@ class AbstractBoard:
         if self._stored_state_clone is None:
             return False
         
-        AbstractBoard._copy_state_from_to(self._stored_state_clone, self)
+        self._copy_state_from_to(self._stored_state_clone, self)
 
         return True
     
-    @staticmethod
     def _copy_state_from_to(from_board, to_board):
         to_board.player_position = from_board.player_position
-        for (i, elem) in enumerate(from_board._elements):
-            to_board._elements[i] = elem
-
-    @property
-    def elements(self):
-        return self._elements
 
     @property
     def width(self):

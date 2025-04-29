@@ -14,3 +14,7 @@ class AbstractBoardData:
     def height() -> int:
         pass
 
+    @property
+    def player_position() -> int:
+        pass
+
