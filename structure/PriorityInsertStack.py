@@ -4,13 +4,12 @@ from structure.array.VectorArray import VectorArray
 from structure.array.IArray import IArray
 
 
-class PriorityInsertQueue:
+class PriorityInsertStack:
     def __init__(self):
         self.__priorityArray = VectorArray()
         self.__highestPriority = -1
 
-
-    def enqueue(self, priority: int, item):
+    def put(self, priority: int, item):
         queueArray = self.__getOrAppendNewAt(priority)
 
         queueArray.put(item)
@@ -20,7 +19,7 @@ class PriorityInsertQueue:
         queueArray = None
         pairArray = None
 
-        index_new_or_old = PriorityInsertQueue._binary_search(self.__priorityArray, newPriority)
+        index_new_or_old = PriorityInsertStack._binary_search(self.__priorityArray, newPriority)
 
         if (self.__highestPriority < 0 
             or index_new_or_old > self.__priorityArray.size() - 1
@@ -44,11 +43,11 @@ class PriorityInsertQueue:
         return queueArray
 
 
-    def dequeue(self): # -> T
+    def pop(self): # -> T
         if self.__highestPriority < 0:
             return None
 
-        # Get last item - the highest priority
+        # Get last item - the lowest priority
         priorityArraySize = self.__priorityArray.size()
         pairArray = self.__priorityArray.get(priorityArraySize - 1)
         queueArray = pairArray.get(1)
@@ -59,9 +58,6 @@ class PriorityInsertQueue:
 
             if priorityArraySize < 1:
                 self.__highestPriority = -1
-            else:
-                pairArray = self.__priorityArray.get(priorityArraySize - 1)
-                self.__highestPriority = pairArray.get(0)
             
         return queueArray.remove(0)
 
@@ -81,7 +77,7 @@ class PriorityInsertQueue:
             print(start, end)
             if array.size() < 1:
                 return 0
-            if priority > array.get(start).get(0):
+            if priority < array.get(start).get(0):
                 return start + 1
             # We'll use item that we already have
             if priority == array.get(start).get(0):
@@ -90,14 +86,14 @@ class PriorityInsertQueue:
             return start
             
         mid = int(math.ceil((start + end) / 2))
-        if priority >= array.get(mid).get(0):
-            return PriorityInsertQueue._binary_search(array, priority, start=mid, end=end)
+        if priority <= array.get(mid).get(0):
+            return PriorityInsertStack._binary_search(array, priority, start=mid, end=end)
         
-        return PriorityInsertQueue._binary_search(array, priority, start=start, end=mid - 1)
+        return PriorityInsertStack._binary_search(array, priority, start=start, end=mid - 1)
         
 
     def __str__(self) -> str:
-        return ('PriorityInsertQueue: [' + ', \n'.join(list(map(
+        return ('PriorityInsertStack: [' + ', \n'.join(list(map(
             lambda x: '[{p}, {val}]'.format(p=x.get(0), val=x.get(1)),
             # lambda x: str(x),
             self.__priorityArray

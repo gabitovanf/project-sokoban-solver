@@ -1,22 +1,24 @@
 from structure.queue.PriorityInsertQueue import PriorityInsertQueue
+from structure.PriorityInsertStack import PriorityInsertStack
 
 
 queue = PriorityInsertQueue()
+stack = PriorityInsertStack()
 
-queue.enqueue(1, 1)
-queue.enqueue(2, 2)
-queue.enqueue(3, 3)
-queue.enqueue(4, 4)
-queue.enqueue(100, 100)
-queue.enqueue(50, 50)
-queue.enqueue(3, 12)
-queue.enqueue(3, 13)
-queue.enqueue(3, 14)
-queue.enqueue(3, 15)
+stack.put(1, 1)
+stack.put(2, 2)
+stack.put(3, 3)
+stack.put(4, 4)
+stack.put(100, 100)
+stack.put(50, 50)
+stack.put(3, 12)
+stack.put(3, 13)
+stack.put(3, 14)
+stack.put(3, 15)
 
-print(queue)
+print(stack)
 
-while not queue.is_empty:
-    print(queue.dequeue())
+while not stack.is_empty:
+    print(stack.pop())
 
 # python3 PriorityQueueTestApp.py
