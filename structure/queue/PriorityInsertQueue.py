@@ -4,6 +4,7 @@ from structure.array.VectorArray import VectorArray
 from structure.array.IArray import IArray
 
 
+# To reduce memory usage
 class PriorityInsertQueue:
     def __init__(self):
         self.__priorityArray = VectorArray()

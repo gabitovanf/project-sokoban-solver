@@ -4,6 +4,7 @@ from structure.array.VectorArray import VectorArray
 from structure.array.IArray import IArray
 
 
+# To reduce memory usage
 class PriorityInsertStack:
     def __init__(self):
         self.__priorityArray = VectorArray()
@@ -36,7 +37,6 @@ class PriorityInsertStack:
             if self.__highestPriority < newPriority:
                 self.__highestPriority = newPriority
         else:
-            print(index_new_or_old, self.__priorityArray.size())
             pairArray = self.__priorityArray.get(index_new_or_old)
             queueArray = pairArray.get(1)
 
@@ -74,7 +74,6 @@ class PriorityInsertStack:
 
 
         if end <= start:
-            print(start, end)
             if array.size() < 1:
                 return 0
             if priority < array.get(start).get(0):
