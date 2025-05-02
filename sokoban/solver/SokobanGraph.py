@@ -1,5 +1,5 @@
 from sokoban.ISearchGraph import ISearchGraph
-from sokoban.board.SokobanBoard import SokobanBoard
+from sokoban.board.ISokobanBoard import ISokobanBoard
 from sokoban.board.MoveDirection import MoveDirection, MOVE_ACTIONS
 from sokoban.solver.BoardStateNode import BoardStateNode
 
@@ -7,7 +7,7 @@ from sokoban.solver.BoardStateNode import BoardStateNode
 class SokobanGraph(ISearchGraph):
     MAX_LEVEL = 1 << 50
 
-    def __init__(self, board: SokobanBoard):
+    def __init__(self, board: ISokobanBoard):
         super().__init__()
 
         self._board = board

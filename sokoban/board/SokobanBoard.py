@@ -163,7 +163,7 @@ class SokobanBoard(AbstractArrayBoard):
                 
                 continue
 
-            if self._is_goal(elem_index):
+            if self.is_goal(elem_index):
                 num_goals += 1
                 
                 continue
@@ -204,20 +204,23 @@ class SokobanBoard(AbstractArrayBoard):
         self._elements[index] ^= 1
     
     # Elements states check
+    def _is_goal_element(self, element) -> bool:
+        return (element & 4) != 0
+
+    def is_box_element(self, element) -> bool:
+        return (element & 1) != 0
+
     def _is_wall(self, index):
         return (self._elements[index] & 2) != 0
     
-    def _is_goal(self, index, hard = False): # TODO: hard ???
-        return (self._elements[index] & 4) != 0
+    def is_goal(self, index, hard = False): # TODO: hard ???
+        return self._is_goal_element(self._elements[index])
     
     def _is_box(self, index):
-        return self._is_box_2(self._elements[index])
+        return self.is_box_element(self._elements[index])
     
     def _is_box_on_goal(self, index):
         return self._is_box_on_goal_2(self._elements[index])
-    
-    def _is_box_2(self, element):
-        return (element & 1) != 0
     
     def _is_box_on_goal_2(self, element):
         mask = 0
@@ -274,7 +277,7 @@ class SokobanBoard(AbstractArrayBoard):
         has_box_out_of_goal = False
 
         for element in elements:
-            if self._is_box_2(element) and not self._is_box_on_goal_2(element):
+            if self.is_box_element(element) and not self._is_box_on_goal_2(element):
                 has_box_out_of_goal = True
                 break
 

@@ -1,11 +1,11 @@
 from structure.matrix.ListMatrix import ListMatrix
 from utility_algorithms.AssignmentProblem import AssignmentProblem
-from sokoban.board.SokobanBoard import SokobanBoard
+from sokoban.board.ISokobanBoard import ISokobanBoard
 from sokoban.solver.BoardStateNode import BoardStateNode
 
 
 class BoxesToGoalsManhattan:
-    def __init__(self, board: SokobanBoard):
+    def __init__(self, board: ISokobanBoard):
         self._board = board
         self._goals_positions = []
         self._boxes_positions = []
@@ -42,7 +42,7 @@ class BoxesToGoalsManhattan:
 
 
     @staticmethod
-    def _get_simple_manhattan(board: SokobanBoard, from_positions: list, to_positions: list) -> list:
+    def _get_simple_manhattan(board: ISokobanBoard, from_positions: list, to_positions: list) -> list:
         sum = 0
         for i in range(0, len(from_positions), 1):
             p_i = from_positions[i]
@@ -58,7 +58,7 @@ class BoxesToGoalsManhattan:
 
 
     @staticmethod
-    def _get_minimum_manhattan(board: SokobanBoard, from_positions: list, to_positions: list) -> list:
+    def _get_minimum_manhattan(board: ISokobanBoard, from_positions: list, to_positions: list) -> list:
         sum = 0
 
         # Fill Matrix
@@ -83,21 +83,21 @@ class BoxesToGoalsManhattan:
     
 
     @staticmethod
-    def _update_goals_positions(board: SokobanBoard, target_list: list):
+    def _update_goals_positions(board: ISokobanBoard, target_list: list):
         while len(target_list) > 0:
             target_list.pop()
 
         for index in range(0, board.size, 1):
-            if board._is_goal(index):
+            if board.is_goal(index):
                 target_list.append(index)
         
 
     @staticmethod
-    def _update_boxes_positions(board: SokobanBoard, elements: list, target_list: list):
+    def _update_boxes_positions(board: ISokobanBoard, elements: list, target_list: list):
         while len(target_list) > 0:
             target_list.pop()
 
         for index in range(0, board.size, 1):
-            if board._is_box_2(elements[index]):
+            if board.is_box_element(elements[index]):
                 target_list.append(index)
 
