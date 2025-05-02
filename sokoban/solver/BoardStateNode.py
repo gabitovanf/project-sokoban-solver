@@ -1,8 +1,10 @@
 class BoardStateNode:
-    def __init__(self, state_stamp, action, level: int = 0):
+    def __init__(self, state_stamp, action, level: int = 0, path_cost: int = 0, total_cost: int = 0):
         self._state_stamp = state_stamp
         self._level = level
         self._action = action
+        self._path_cost = path_cost
+        self._total_cost = total_cost
         self._parent_node = None
 
         self._children = []
@@ -36,7 +38,23 @@ class BoardStateNode:
         self._parent_node = node
 
     @property
-    def has_path_queues(self):
+    def path_cost(self):
+        return self._path_cost
+
+    @path_cost.setter
+    def path_cost(self, value):
+        self._path_cost = value
+
+    @property
+    def total_cost(self):
+        return self._total_cost
+
+    @total_cost.setter
+    def total_cost(self, value):
+        self._total_cost = value
+
+    @property
+    def has_path_records(self):
         return False
 
 

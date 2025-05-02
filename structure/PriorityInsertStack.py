@@ -67,6 +67,48 @@ class PriorityInsertStack:
         return self.__highestPriority < 0
 
 
+    # EXTRA METHODS FOR A*:
+    def replace_item(self, from_priority: int, to_priority: int, item) -> int:
+        if from_priority == to_priority:
+            return
+        
+        self._remove_item_from(from_priority, item)
+        self.put(to_priority, item)
+
+
+    def _remove_item_from(self, from_priority: int, item):
+        if self.is_empty:
+            return
+
+        p_index = PriorityInsertStack._binary_search(self.__priorityArray, from_priority)
+
+        # Priority is not found
+        if (p_index > self.__priorityArray.size() - 1
+            or (self.__priorityArray.get(p_index) is not None 
+                and from_priority != self.__priorityArray.get(p_index).get(0)
+                )
+            ):
+            return None
+        
+        pairArray = self.__priorityArray.get(p_index)
+        queueArray = pairArray.get(1)
+
+        i = 0
+        while i < queueArray.size() and queueArray.get(i) != item:
+            i += 1
+            
+        if i < queueArray.size():
+            if queueArray.size() < 2:
+                self.__priorityArray.remove(p_index)
+
+                if self.__priorityArray.size() < 1:
+                    self.__highestPriority = -1
+
+            return queueArray.remove(i)
+
+        return None
+
+
     @staticmethod
     def _binary_search(array: IArray, priority: int, start: int = -1, end: int = -1) -> int:
         if start < 0: start = 0

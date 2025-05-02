@@ -73,28 +73,27 @@ class PriorityInsertQueue:
 
 
     @staticmethod
-    def _binary_search(array: IArray, priority: int, start: int = -1, end: int = -1) -> int:
+    def _binary_search(array: IArray, new_value: int, start: int = -1, end: int = -1) -> int:
         if start < 0: start = 0
         if end < 0: end = array.size() - 1
 
 
         if end <= start:
-            print(start, end)
             if array.size() < 1:
                 return 0
-            if priority > array.get(start).get(0):
+            if new_value > array.get(start).get(0):
                 return start + 1
             # We'll use item that we already have
-            if priority == array.get(start).get(0):
+            if new_value == array.get(start).get(0):
                 return start
     
             return start
             
         mid = int(math.ceil((start + end) / 2))
-        if priority >= array.get(mid).get(0):
-            return PriorityInsertQueue._binary_search(array, priority, start=mid, end=end)
+        if new_value >= array.get(mid).get(0):
+            return PriorityInsertQueue._binary_search(array, new_value, start=mid, end=end)
         
-        return PriorityInsertQueue._binary_search(array, priority, start=start, end=mid - 1)
+        return PriorityInsertQueue._binary_search(array, new_value, start=start, end=mid - 1)
         
 
     def __str__(self) -> str:

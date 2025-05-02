@@ -20,6 +20,7 @@ class SokobanGraph(ISearchGraph):
     def get_neighbors(self, current: BoardStateNode) -> list:
         children = []
         children_level = current.level + 1
+        path_cost = current.path_cost
 
         if children_level > SokobanGraph.MAX_LEVEL:
             return children
@@ -36,11 +37,16 @@ class SokobanGraph(ISearchGraph):
 
             self._board.move(move)
 
-            new_node = BoardStateNode(self._board.get_state_stamp(), move, children_level)
+            new_node = BoardStateNode(
+                self._board.get_state_stamp(),
+                move, 
+                children_level, 
+                path_cost=path_cost + 1
+            )
             current.append(new_node)
             # children.append(new_node)
 
-        print('LEVEL', children_level, end='\r', flush=True)
+        # print('LEVEL', children_level, end='\r', flush=True)
         return current.children
 
 

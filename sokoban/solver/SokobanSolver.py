@@ -6,9 +6,13 @@ from sokoban.solver.SokobanGraph import SokobanGraph
 from sokoban.solver.SokobanGraphNodeGenerator import SokobanGraphNodeGenerator
 # from sokoban.board.MoveDirection import MoveDirection
 from sokoban.solver.BoardStateNode import BoardStateNode
+from sokoban.solver.array_board_heuristic.BoxesToGoalsManhattan import BoxesToGoalsManhattan
 
 
 class SokobanSolver():
+    HEURISTIC_SIMPLE_MANHATTAN = 'HEURISTIC_SIMPLE_MANHATTAN'
+    HEURISTIC_MINIMUM_MANHATTAN = 'HEURISTIC_MINIMUM_MANHATTAN'
+
     def __init__(self):
         super().__init__()
 
@@ -58,9 +62,27 @@ class SokobanSolver():
 
         return self._get_result_tuple(board, final_node, max_levels)
  
-    def A_star(self, board: SokobanBoard):
-        # player_position = self._board.player_position
-        pass
+    def A_star(self, board: SokobanBoard, max_levels: int = 15, save_graph_nodes: bool = True, heuristic=None):
+        graph = SokobanGraph(board) if save_graph_nodes else SokobanGraphNodeGenerator(board)
+        self._graph = graph
+
+        heuristic_instance = BoxesToGoalsManhattan(board)
+        heuristic_function = heuristic_instance.simple_manhattan_heuristic  # Default
+        if heuristic == SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN:
+            heuristic_function = heuristic_instance.min_manhattan_heuristic
+
+        final_node = GraphSearch.A_star(
+            graph, 
+            graph.root, 
+            lambda x: False, 
+            lambda node: board.is_solution(node.state_stamp),
+            max_level=max_levels,
+            heuristic=heuristic_function
+        )
+
+        print('IS SOLUTION', board.is_solution(final_node.state_stamp), final_node.state_stamp)
+
+        return self._get_result_tuple(board, final_node, max_levels)
 
     def _reconstruct_result_from_node(self, board: SokobanBoard, final_node: BoardStateNode) -> tuple:
         result_action_stack = Stack()
@@ -80,20 +102,15 @@ class SokobanSolver():
 
         return result_action_stack, result_player_position_str
     
-    def _result_from_queues(self, board: SokobanBoard, path_actions_queue: Queue, path_state_stamps_queue: Queue) -> tuple:
+    def _result_from_records(self, board: SokobanBoard, path_actions: Queue, path_state_stamps: Queue) -> tuple:
         result_player_position_str = ''
         result_action_stack = Stack()
 
-        queue = Queue()
-        while not path_actions_queue.is_empty:
-            queue.enqueue(path_actions_queue.dequeue())
-        while not queue.is_empty:
-            result_action_stack.push(queue.dequeue())
-            
-        while not path_state_stamps_queue.is_empty:
-            queue.enqueue(path_actions_queue.dequeue())
-        while not queue.is_empty:
-            _, player_position, _, _ = queue.dequeue()
+        for i in range(len(path_actions) - 1, -1, -1):
+            result_action_stack.push(path_actions[i])
+
+        for i in range(0, len(path_state_stamps), 1):
+            _, player_position, _, _ = path_state_stamps[i]
 
             if len(result_player_position_str) > 0:
                 result_player_position_str += ', '
@@ -105,8 +122,8 @@ class SokobanSolver():
         if final_node is None:
             return False, Stack(), '', max_levels
         
-        result = (self._result_from_queues(board, final_node.path_actions_queue, final_node.path_state_stamps_queue) 
-                  if final_node.has_path_queues 
+        result = (self._result_from_records(board, final_node.path_actions, final_node.path_state_stamps) 
+                  if final_node.has_path_records 
                   else self._reconstruct_result_from_node(board, final_node))
         
         if final_node.level > max_levels and not board.is_solution(final_node.state_stamp):

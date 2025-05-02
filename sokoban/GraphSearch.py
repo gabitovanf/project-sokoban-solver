@@ -1,6 +1,8 @@
 from structure.queue.Queue import Queue
 from structure.Stack import Stack
+from structure.PriorityInsertStack import PriorityInsertStack
 from sokoban.ISearchGraph import ISearchGraph
+from sokoban.solver.array_board_heuristic.BoxesToGoalsManhattan import BoxesToGoalsManhattan
 
 
 class GraphSearch:
@@ -23,12 +25,15 @@ class GraphSearch:
                 if next not in reached:
                     # validate solution
                     if search_condition(next):
+                        print('NUM REACHED', len(reached), '\n\n')
                         return next
 
                     frontier.enqueue(next)
                     reached.add(next)
                     apply_to_reached(next)
+                    print('NUM REACHED', len(reached), end='\r', flush=True)
 
+        print('NUM REACHED', len(reached), '\n\n')
         return None
     
     @staticmethod
@@ -62,12 +67,69 @@ class GraphSearch:
                                 minimum_solution = next
                                 minimum_level = current_level + 1
                         else:
+                            print('NUM REACHED', len(reached), '\n\n')
                             return next
 
                     frontier.push(next)
                     frontier_level.push(current_level + 1)
                     reached.add(next)
                     apply_to_reached(next)
+                    print('NUM REACHED', len(reached), end='\r', flush=True)
 
+        print('NUM REACHED', len(reached), '\n\n')
         return minimum_solution
+
+    
+    @staticmethod
+    def A_star(
+        graph_instance: ISearchGraph,
+        start_state, 
+        apply_to_reached,
+        search_condition, 
+        max_level: int = 1 << 50,
+        heuristic = None
+    ):
+        if not callable(heuristic):
+            heuristic = BoxesToGoalsManhattan.min_manhattan_heuristic
+        if search_condition(start_state):
+            return start_state
+        
+        start_state.total_cost = start_state.path_cost + heuristic(start_state)
+
+        frontier = PriorityInsertStack()
+        reached = set()
+        frontier.put(start_state.total_cost, (start_state, 0))
+        reached.add(start_state)
+
+        while not frontier.is_empty:
+            current_state, current_level = frontier.pop()
+
+            if current_level >= max_level:
+                continue
+
+            for next in graph_instance.get_neighbors(current_state):
+                # validate solution
+                if search_condition(next):
+                    print('NUM REACHED', len(reached), '\n\n')
+                    return next
+            
+                previous_total_cost = next.total_cost
+                next.total_cost = next.path_cost + heuristic(next)
+                # Uncomment to check a factor of total cost
+                print('TOTAL COST', next.total_cost, next.path_cost, heuristic(next))
+
+                if next not in reached:
+                    frontier.put(next.total_cost, (next, current_level + 1))
+                    reached.add(next)
+                    apply_to_reached(next)
+
+                    print('NUM REACHED', len(reached), end='\n', flush=True)
+                    
+                elif previous_total_cost > next.total_cost:
+                    frontier.replace_item(previous_total_cost, next.total_cost, next)
+
+
+
+        print('NUM REACHED', len(reached), '\n\n')
+        return None
 

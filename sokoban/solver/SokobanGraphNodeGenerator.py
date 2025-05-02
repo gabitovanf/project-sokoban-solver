@@ -12,7 +12,7 @@ class SokobanGraphNodeGenerator(ISearchGraph):
         super().__init__()
 
         self._board = board
-        self._root_node = BoardStateAndPathNode(board.get_state_stamp(), MoveDirection.NO, 0)
+        self._root_node = BoardStateAndPathNode(None, board.get_state_stamp(), MoveDirection.NO, 0)
 
     @property
     def root(self) -> BoardStateAndPathNode:
@@ -21,6 +21,7 @@ class SokobanGraphNodeGenerator(ISearchGraph):
     def get_neighbors(self, current: BoardStateAndPathNode) -> list:
         children = []
         children_level = current.level + 1
+        path_cost = current.path_cost
 
         if children_level > SokobanGraphNodeGenerator.MAX_LEVEL:
             return children
@@ -37,11 +38,17 @@ class SokobanGraphNodeGenerator(ISearchGraph):
 
             self._board.move(move)
 
-            new_node = BoardStateAndPathNode(self._board.get_state_stamp(), move, children_level)
+            new_node = BoardStateAndPathNode(
+                current, 
+                self._board.get_state_stamp(), 
+                move, 
+                children_level, 
+                path_cost=path_cost + 1
+            )
             # current.append(new_node)
             children.append(new_node)
 
-        print('LEVEL', children_level, end='\r', flush=True)
+        # print('LEVEL', children_level, end='\r', flush=True)
         return children
 
 
