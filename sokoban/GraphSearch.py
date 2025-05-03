@@ -15,12 +15,15 @@ class GraphSearch:
     @staticmethod
     def BFS(graph_instance: ISearchGraph, start_state, apply_to_reached, search_condition):
         if search_condition(start_state):
-            return start_state
+            return start_state, { 'num_reached': 0 }
 
         frontier = Queue()
         reached = set()
         frontier.enqueue(start_state)
         reached.add(start_state)
+
+        def get_metrics() -> dict:
+            return { 'num_reached': len(reached) }
 
         while not frontier.is_empty:
             current_state = frontier.dequeue()
@@ -29,7 +32,7 @@ class GraphSearch:
                     # validate solution
                     if search_condition(next):
                         print('NUM REACHED', len(reached), '\n\n')
-                        return next
+                        return next, get_metrics()
 
                     frontier.enqueue(next)
                     reached.add(next)
@@ -37,12 +40,12 @@ class GraphSearch:
                     print('NUM REACHED', len(reached), end='\r', flush=True)
 
         print('NUM REACHED', len(reached), '\n\n')
-        return None
+        return None, get_metrics()
     
     @staticmethod
     def DFS(graph_instance: ISearchGraph, start_state, apply_to_reached, search_condition, depth_limit: int = sys.maxsize, search_minimum: bool = False):
         if search_condition(start_state):
-            return start_state
+            return start_state, { 'num_reached': 0 }
         
         frontier = Stack()
         frontier_level = Stack()
@@ -53,6 +56,9 @@ class GraphSearch:
 
         minimum_solution = None
         minimum_level = depth_limit + 1
+
+        def get_metrics() -> dict:
+            return { 'num_reached': len(reached) }
 
         while not frontier.is_empty:
             current_state = frontier.pop()
@@ -71,7 +77,7 @@ class GraphSearch:
                                 minimum_level = current_level + 1
                         else:
                             print('NUM REACHED', len(reached), '\n\n')
-                            return next
+                            return next, get_metrics()
 
                     frontier.push(next)
                     frontier_level.push(current_level + 1)
@@ -80,7 +86,7 @@ class GraphSearch:
                     print('NUM REACHED', len(reached), end='\r', flush=True)
 
         print('NUM REACHED', len(reached), '\n\n')
-        return minimum_solution
+        return minimum_solution, get_metrics()
 
     
     @staticmethod
@@ -99,7 +105,7 @@ class GraphSearch:
         if not callable(heuristic):
             heuristic = BoxesToGoalsManhattan.min_manhattan_heuristic
         if search_condition(start_state):
-            return start_state
+            return start_state, { 'num_reached': 0 }
         
         start_state.total_cost = start_state.path_cost + heuristic(start_state)
 
@@ -107,6 +113,9 @@ class GraphSearch:
         reached = set()
         frontier.put(start_state.total_cost, (start_state, 0))
         reached.add(start_state)
+
+        def get_metrics() -> dict:
+            return { 'num_reached': len(reached) }
 
         while not frontier.is_empty:
             current_state, current_level = frontier.pop()
@@ -122,7 +131,7 @@ class GraphSearch:
                         # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
                         '\n\n'
                     )
-                    return next
+                    return next, get_metrics()
             
                 previous_total_cost = next.total_cost
                 next.total_cost = next.path_cost + heuristic(next)
@@ -152,7 +161,7 @@ class GraphSearch:
             # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
             '\n\n'
         )
-        return None
+        return None, get_metrics()
 
     
     @staticmethod
@@ -167,11 +176,17 @@ class GraphSearch:
         heuristic = None
     ):
         final_node = None
+        metrics_dict = {}
         solved = False
         depth_limit = start_depth_limit
 
+        def get_metrics() -> dict:
+            metrics_dict.update({ 'depth_limit': depth_limit })
+
+            return metrics_dict
+
         while not solved:
-            final_node = GraphSearch._IDA_star_iteration(
+            final_node, metrics_dict = GraphSearch._IDA_star_iteration(
                 graph_instance, 
                 start_state, 
                 apply_to_reached,
@@ -179,13 +194,15 @@ class GraphSearch:
                 depth_limit=depth_limit,
                 heuristic=heuristic
             )
-            solved = search_condition(final_node)
+            solved = final_node is not None and search_condition(final_node)
             depth_limit += increment_depth_limit
 
             if depth_limit > max_depth_limit:
                 break
 
-        return final_node
+        depth_limit -= increment_depth_limit
+
+        return final_node, get_metrics()
     
     @staticmethod
     def _IDA_star_iteration(
@@ -203,7 +220,7 @@ class GraphSearch:
         if not callable(heuristic):
             heuristic = BoxesToGoalsManhattan.min_manhattan_heuristic
         if search_condition(start_state):
-            return start_state
+            return start_state, { 'num_reached': 0 }
         
         start_state.total_cost = start_state.path_cost + heuristic(start_state)
 
@@ -211,6 +228,9 @@ class GraphSearch:
         reached = set()
         frontier.put(start_state.total_cost, (start_state, 0))
         reached.add(start_state)
+
+        def get_metrics() -> dict:
+            return { 'num_reached': len(reached) }
 
         while not frontier.is_empty:
             current_state, current_level = frontier.pop()
@@ -226,7 +246,7 @@ class GraphSearch:
                         # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
                         '\n\n'
                     )
-                    return next
+                    return next, get_metrics()
             
                 previous_total_cost = next.total_cost
                 next.total_cost = next.path_cost + heuristic(next)
@@ -256,5 +276,5 @@ class GraphSearch:
             # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
             '\n\n'
         )
-        return None
+        return None, get_metrics()
 

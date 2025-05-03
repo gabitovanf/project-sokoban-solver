@@ -24,7 +24,7 @@ class SokobanSolver():
         graph = SokobanGraph(board) if save_graph_nodes else SokobanGraphNodeGenerator(board)
         self._graph = graph
 
-        final_node = GraphSearch.BFS(
+        final_node, _ = GraphSearch.BFS(
             graph, 
             graph.root, 
             lambda x: False, 
@@ -53,7 +53,7 @@ class SokobanSolver():
         graph = SokobanGraph(board) if save_graph_nodes else SokobanGraphNodeGenerator(board)
         self._graph = graph
 
-        final_node = GraphSearch.DFS(
+        final_node, _ = GraphSearch.DFS(
             graph, 
             graph.root, 
             lambda x: False, 
@@ -70,7 +70,7 @@ class SokobanSolver():
 
         heuristic_function = SokobanSolver._get_heuristic(board, heuristic)
 
-        final_node = GraphSearch.A_star(
+        final_node, _ = GraphSearch.A_star(
             graph, 
             graph.root, 
             lambda x: False, 
@@ -97,32 +97,25 @@ class SokobanSolver():
 
         heuristic_function = SokobanSolver._get_heuristic(board, heuristic)
 
-        final_node = None
-        solved = False
-        depth_limit = start_depth_limit
-
-        while not solved:
-            final_node = GraphSearch.A_star(
-                graph, 
-                graph.root, 
-                lambda x: False, 
-                lambda node: board.is_solution(node.state_stamp),
-                depth_limit=depth_limit,
-                heuristic=heuristic_function
-            )
-            solved = board.is_solution(final_node.state_stamp)
-            depth_limit += increment_depth_limit
-
-            if depth_limit > max_depth_limit:
-                break
+        final_node, metrics_dict = GraphSearch.IDA_star(
+            graph, 
+            graph.root, 
+            lambda x: False, 
+            lambda node: board.is_solution(node.state_stamp),
+            start_depth_limit = start_depth_limit, 
+            increment_depth_limit = increment_depth_limit, 
+            max_depth_limit = max_depth_limit,
+            heuristic=heuristic_function
+        )
 
         if not final_node:
             print('NO NODE FOUND')
+        else:
+            print('IS SOLUTION', board.is_solution(final_node.state_stamp), final_node.state_stamp)
 
-        print('IS SOLUTION', board.is_solution(final_node.state_stamp), final_node.state_stamp)
-        print('Depth limit:', depth_limit, 'of {start} + i * {delta}\n\n'.format(start=start_depth_limit, delta= increment_depth_limit))
+        print('Depth limit:', metrics_dict.get('depth_limit', start_depth_limit), 'of {start} + i * {delta}\n\n'.format(start=start_depth_limit, delta= increment_depth_limit))
 
-        return self._get_result_tuple(board, final_node, depth_limit)
+        return self._get_result_tuple(board, final_node, metrics_dict.get('depth_limit', start_depth_limit))
     
     @staticmethod
     def _get_heuristic(board: SokobanBoard, heuristic=None):
