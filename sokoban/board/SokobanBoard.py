@@ -363,6 +363,12 @@ class SokobanBoard(ISokobanBoard, AbstractArrayBoard):
     def get_state_stamp(self):
         return self._elements.copy(), self._player_position, self._move_id, self._move_level
     
+    def state_stamp_equal(self, stamp_a, stamp_b) -> bool:
+        elements_a, player_postion_a, _, _ = stamp_a
+        elements_b, player_postion_b, _, _ = stamp_b
+
+        return elements_a == elements_b and player_postion_a == player_postion_b
+
     def restore_state_from_stamp(self, state_tuple):
         elements, player_postion, move_id, move_level = state_tuple
 

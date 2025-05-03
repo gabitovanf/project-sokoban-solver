@@ -15,6 +15,8 @@ from sokoban.control.SokobanMoveSequencePlayer import SokobanMoveSequencePlayer
 from structure.Stack import Stack
 
 # ALL THE METRICS STATED WHEN BACKWARD MOVES ARE FORBIDDEN ON NODES' NEIGHBORS
+# FROM THAT COMMIT SOME BACKWARD MOVES ARE ALLOWD 
+# (after some changes of boxs' position)
 
 # A-star + simple heuristic:
 # REF 10000 REACHED AT 2.2786099910736084 - list-board
@@ -109,6 +111,7 @@ from structure.Stack import Stack
 # A_star + minimum manhattan + "mid player to boxes" heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 1913, TIME ELAPSED 0.24763798713684082
 # A_star + minimum manhattan + "mid player to free boxes" heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 2182, TIME ELAPSED 0.21687817573547363
 
+# IDA_star + minimum manhattan heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 7298, TIME ELAPSED 1.2707240581512451, Depth limit: 20 of 10 + i * 10
 # IDA_star + minimum manhattan + "mid player to free boxes" heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 1059, TIME ELAPSED 0.15013885498046875, Depth limit: 20 of 10 + i * 10
 level_str = '\n'.join([
     '##########',

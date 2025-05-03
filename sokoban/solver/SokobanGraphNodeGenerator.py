@@ -27,6 +27,7 @@ class SokobanGraphNodeGenerator(ISearchGraph):
             return children
 
         backward_move = MoveDirection.reversed(current.action)
+        # OPTION 2
         # for i in range(0, len(MOVE_ACTIONS) + 1, 1):
         #     # Backward move make last
         #     move = 0
@@ -36,12 +37,14 @@ class SokobanGraphNodeGenerator(ISearchGraph):
         #         move = MOVE_ACTIONS[i]
         #         if move == backward_move:
         #             continue
+
+        # OPTION 1
         for i in range(0, len(MOVE_ACTIONS), 1):
             # Omit backward move
             move = MOVE_ACTIONS[i]
             if move == backward_move:
                 continue
-
+            
             self._board.restore_state_from_stamp(current.state_stamp)
 
             if not self._board.can_move(move):
@@ -56,6 +59,7 @@ class SokobanGraphNodeGenerator(ISearchGraph):
                 children_level, 
                 path_cost=path_cost + 1
             )
+
             # current.append(new_node)
             children.append(new_node)
 

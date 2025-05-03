@@ -220,6 +220,12 @@ class SokobanIntMasksBoard(ISokobanBoard):
     def get_state_stamp(self):
         return (self._mask_box, self._mask_goal, self._mask_active), self._player_position, self._move_id, self._move_level
     
+    def state_stamp_equal(self, stamp_a, stamp_b) -> bool:
+        masks_a, player_postion_a, _, _ = stamp_a
+        masks_b, player_postion_b, _, _ = stamp_b
+
+        return masks_a == masks_b and player_postion_a == player_postion_b
+    
     def restore_state_from_stamp(self, state_tuple):
         masks, player_postion, move_id, move_level = state_tuple
         mask_box, mask_goal, _ = masks

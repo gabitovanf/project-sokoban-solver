@@ -93,6 +93,9 @@ class ISokobanBoard(AbstractBoard):
     def get_state_stamp(self) -> tuple:
         pass
 
+    def state_stamp_equal(self) -> bool:
+        pass
+
     def restore_state_from_stamp(self, stamp: tuple):
         pass
 
