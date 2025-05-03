@@ -14,6 +14,9 @@ from sokoban.solver.SokobanSolver import SokobanSolver
 from sokoban.control.SokobanMoveSequencePlayer import SokobanMoveSequencePlayer
 from structure.Stack import Stack
 
+# ALL THE METRICS STATED WHEN BACKWARD MOVES ARE FORBIDDEN ON NODES' NEIGHBORS
+# Except IDA*
+
 # A-star + simple heuristic:
 # REF 10000 REACHED AT 2.2786099910736084 - list-board
 # REF 100000 REACHED AT 113.67122483253479 - list-board
