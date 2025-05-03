@@ -85,6 +85,20 @@ class SokobanIntMasksBoard(ISokobanBoard):
         mask_box, _, _ = masks
 
         return BitCount.get_positions(self._normalize_mask(mask_box), mode=1, target_list=target_list)
+        
+    def _get_boxes_not_on_goals_positions(self, state_stamp: tuple, target_list: list = None):
+        if target_list is None:
+            target_list = []
+
+        while len(target_list) > 0:
+            target_list.pop()
+
+        masks, _, _, _ = state_stamp
+        mask_box, _, _ = masks
+
+        mask_box = self._mask_box & (~self._mask_goal)
+
+        return BitCount.get_positions(self._normalize_mask(mask_box), mode=1, target_list=target_list)
 
     # GETTERS
     # Elements states check

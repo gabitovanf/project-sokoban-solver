@@ -189,6 +189,21 @@ class SokobanBoard(ISokobanBoard, AbstractArrayBoard):
                 target_list.append(index)
                 
         return target_list
+        
+    def _get_boxes_not_on_goals_positions(self, state_stamp: tuple, target_list: list = None):
+        elements, _, _, _ = state_stamp
+
+        if target_list is None:
+            target_list = []
+
+        while len(target_list) > 0:
+            target_list.pop()
+
+        for index in range(0, self.size, 1):
+            if self.is_box_element(elements[index]) and not self.is_goal(index):
+                target_list.append(index)
+                
+        return target_list
     
     # Elements setters
     def _set_element(self, index, value):

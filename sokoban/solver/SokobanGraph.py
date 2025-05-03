@@ -26,9 +26,20 @@ class SokobanGraph(ISearchGraph):
             return children
 
         backward_move = MoveDirection.reversed(current.action)
-        for move in MOVE_ACTIONS:
-            if move == backward_move:
-                continue
+        # for i in range(0, len(MOVE_ACTIONS), 1):
+        #     # Omit backward move
+        #     move = MOVE_ACTIONS[i]
+        #     if move == backward_move:
+        #         continue
+        for i in range(0, len(MOVE_ACTIONS) + 1, 1):
+            # Backward move make last
+            move = 0
+            if i > len(MOVE_ACTIONS) - 1:
+                move = backward_move
+            else:
+                move = MOVE_ACTIONS[i]
+                if move == backward_move:
+                    continue
 
             self._board.restore_state_from_stamp(current.state_stamp)
 

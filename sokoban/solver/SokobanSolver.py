@@ -12,6 +12,7 @@ from sokoban.solver.array_board_heuristic.BoxesToGoalsManhattan import BoxesToGo
 class SokobanSolver():
     HEURISTIC_SIMPLE_MANHATTAN = 'HEURISTIC_SIMPLE_MANHATTAN'
     HEURISTIC_MINIMUM_MANHATTAN = 'HEURISTIC_MINIMUM_MANHATTAN'
+    HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN = 'HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN'
 
     def __init__(self):
         super().__init__()
@@ -66,10 +67,7 @@ class SokobanSolver():
         graph = SokobanGraph(board) if save_graph_nodes else SokobanGraphNodeGenerator(board)
         self._graph = graph
 
-        heuristic_instance = BoxesToGoalsManhattan(board)
-        heuristic_function = heuristic_instance.simple_manhattan_heuristic  # Default
-        if heuristic == SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN:
-            heuristic_function = heuristic_instance.min_manhattan_heuristic
+        heuristic_function = SokobanSolver._get_heuristic(board, heuristic)
 
         final_node = GraphSearch.A_star(
             graph, 
@@ -83,6 +81,26 @@ class SokobanSolver():
         print('IS SOLUTION', board.is_solution(final_node.state_stamp), final_node.state_stamp)
 
         return self._get_result_tuple(board, final_node, max_levels)
+    
+    @staticmethod
+    def _get_heuristic(board: SokobanBoard, heuristic=None):
+        heuristic_instance = BoxesToGoalsManhattan(board)
+
+        if isinstance(heuristic, list):
+            return heuristic_instance.combine(
+                list(map(lambda h: SokobanSolver._get_heuristic(board, h), heuristic))
+            )
+
+        heuristic_function = heuristic_instance.simple_manhattan_heuristic  # Default
+
+        if heuristic == SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN:
+            heuristic_function = heuristic_instance.min_manhattan_heuristic
+
+        elif heuristic == SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN:
+            # heuristic_function = heuristic_instance.mid_player_to_boxes_manhattan_heuristic
+            heuristic_function = heuristic_instance.mid_player_to_free_boxes_manhattan_heuristic
+
+        return heuristic_function
 
     def _reconstruct_result_from_node(self, board: SokobanBoard, final_node: BoardStateNode) -> tuple:
         result_action_stack = Stack()

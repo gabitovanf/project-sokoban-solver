@@ -91,9 +91,9 @@ class GraphSearch:
         max_level: int = 1 << 50,
         heuristic = None
     ):
-        start_time = time.time()
-        ref_num_reached_time = 0
-        ref_num_reached = 100000
+        # start_time = time.time()
+        # ref_num_reached_time = 0
+        # ref_num_reached = 100000
 
         if not callable(heuristic):
             heuristic = BoxesToGoalsManhattan.min_manhattan_heuristic
@@ -118,7 +118,7 @@ class GraphSearch:
                 if search_condition(next):
                     print(
                         'NUM REACHED', len(reached), 
-                        '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
+                        # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
                         '\n\n'
                     )
                     return next
@@ -133,12 +133,12 @@ class GraphSearch:
                     reached.add(next)
                     apply_to_reached(next)
 
-                    if len(reached) == ref_num_reached:
-                        ref_num_reached_time = time.time() - start_time
+                    # if len(reached) == ref_num_reached:
+                    #     ref_num_reached_time = time.time() - start_time
 
                     print(
                         'NUM REACHED', len(reached), 
-                        '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time), 
+                        # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time), 
                         end='\n', 
                         flush=True
                     )
@@ -150,7 +150,7 @@ class GraphSearch:
 
         print(
             'NUM REACHED', len(reached), 
-            '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
+            # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
             '\n\n'
         )
         return None

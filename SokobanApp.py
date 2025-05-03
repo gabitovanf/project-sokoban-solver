@@ -12,6 +12,7 @@ from sokoban.board.CreateSokobanBoard import create_from_str, create_from_json_e
 from sokoban.board.MoveDirection import MoveDirection
 from sokoban.solver.SokobanSolver import SokobanSolver
 from sokoban.control.SokobanMoveSequencePlayer import SokobanMoveSequencePlayer
+from structure.Stack import Stack
 
 # A-star + simple heuristic:
 # REF 10000 REACHED AT 2.2786099910736084 - list-board
@@ -52,14 +53,17 @@ from sokoban.control.SokobanMoveSequencePlayer import SokobanMoveSequencePlayer
 # BFS failed - 15 attempt levels
 # DFS failed - 15 attempt levels
 # A_star waited for 13 attempt levels
-# level_str = '\n'.join([
-#     '##########',
-#     '#--------#',
-#     '#-@----$-#',
-#     '#------###',
-#     '#-------.#',
-#     '##########'
-# ])
+# A_star + simple manhattan + "mid player to boxes" heuristic - 17 attempt levels, NUM REACHED 161438, TIME ELAPSED 200.00371408462524
+# -- result: [2, 2, -1, -2, -1, -1, -2, 1, -2, -1, 2, 2, 1, 2, 2, 2, 2, 0] 2 2, 3 2, 4 2, 5 2, 6 2, 6 1, 7 1, 8 1, 8 2, 7 2, 7 1, 6 1, 6 2, 6 3, 5 3, 5 4, 6 4, 7 4
+# A_star + minimum manhattan + "mid player to boxes" heuristic - 17 attempt levels, NUM REACHED 161438, TIME ELAPSED 208.52746438980103
+level_str = '\n'.join([
+    '##########',
+    '#--------#',
+    '#-@----$-#',
+    '#------###',
+    '#-------.#',
+    '##########'
+])
 # SIMPLE III.v2. ONE BOX
 # BFS succeeded - 10 attempt levels
 # DFS succeeded - 14 attempt levels
@@ -82,16 +86,29 @@ from sokoban.control.SokobanMoveSequencePlayer import SokobanMoveSequencePlayer
 #     '#-------.#',
 #     '##########'
 # ])
-# SIMPLE. TOW BOXS
+# SIMPLE. IV.v1. TOW BOXS
 # BFS failed - 15 attempt levels
 # A_star + simple manhattan heuristic succeeded - 15 attempt levels, NUM REACHED 13114, TIME ELAPSED 2.428982973098755
 # A_star + minimum manhattan heuristic succeeded - 15 attempt levels, NUM REACHED 7298, TIME ELAPSED 1.3173191547393799
 # A_star + simple manhattan heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 13114, TIME ELAPSED 2.1312520503997803
 # A_star + minimum manhattan heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 7298, TIME ELAPSED 1.1381828784942627
+# A_star + simple manhattan + "mid player to boxes" heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 3744, TIME ELAPSED 0.4002370834350586
+# A_star + minimum manhattan + "mid player to boxes" heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 1913, TIME ELAPSED 0.24763798713684082
+# A_star + minimum manhattan + "mid player to free boxes" heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 2182, TIME ELAPSED 0.21687817573547363
+# level_str = '\n'.join([
+#     '##########',
+#     '#--------#',
+#     '#-@----$-#',
+#     '#--$----.#',
+#     '#-------.#',
+#     '##########'
+# ])
+# SIMPLE. IV.v2. TOW BOXS
 level_str = '\n'.join([
     '##########',
     '#--------#',
-    '#-@----$-#',
+    '#------$-#',
+    '#-@----###',
     '#--$----.#',
     '#-------.#',
     '##########'
@@ -132,17 +149,29 @@ def main():
     # success, actions_stack, result_player_position_str, result_level = solver.BFS(board_sokoban)
     # success, actions_stack, result_player_position_str, result_level = solver.DFS_first_node_met(board_sokoban, 20)
     # success, actions_stack, result_player_position_str, result_level = solver.DFS(board_sokoban, 20)
-    success, actions_stack, result_player_position_str, result_level = solver.A_star(
-        board_sokoban, 
-        20, 
-        save_graph_nodes=False,
-        heuristic=SokobanSolver.HEURISTIC_SIMPLE_MANHATTAN
-    )
+    # success, actions_stack, result_player_position_str, result_level = solver.A_star(
+    #     board_sokoban, 
+    #     20, 
+    #     save_graph_nodes=False,
+    #     heuristic=SokobanSolver.HEURISTIC_SIMPLE_MANHATTAN
+    # )
     # success, actions_stack, result_player_position_str, result_level = solver.A_star(
     #     board_sokoban, 
     #     30, 
     #     save_graph_nodes=False,
     #     heuristic=SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN
+    # )
+    success, actions_stack, result_player_position_str, result_level = solver.A_star(
+        board_sokoban, 
+        20, 
+        save_graph_nodes=False,
+        heuristic=[SokobanSolver.HEURISTIC_SIMPLE_MANHATTAN, SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN]
+    )
+    # success, actions_stack, result_player_position_str, result_level = solver.A_star(
+    #     board_sokoban, 
+    #     20, 
+    #     save_graph_nodes=False,
+    #     heuristic=[SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN, SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN]
     # )
 
     ## AFTER SOLVER >> 
@@ -152,6 +181,15 @@ def main():
     # TEST static state:
     # board_sokoban.restore_state_from_stamp(([18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 24, 24, 24, 24, 24, 24, 24, 8, 18, 18, 24, 24, 24, 24, 24, 24, 24, 24, 18, 18, 24, 24, 24, 24, 24, 24, 24, 24, 18, 18, 24, 24, 24, 24, 24, 24, 24, 13, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18], 38, 3, 2))
     # board_sokoban.restore_state_from_stamp(([18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 24, 24, 24, 24, 24, 24, 24, 24, 18, 18, 24, 8, 24, 24, 24, 24, 24, 24, 18, 18, 24, 24, 24, 24, 24, 24, 24, 24, 18, 18, 24, 24, 24, 24, 24, 24, 24, 13, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18], 38, 4095, 9))
+
+    # SAVED RESULT TO PLAY
+    # success = True
+    # path_actions = [2, 2, -1, -2, -1, -1, -2, 1, -2, -1, 2, 2, 1, 2, 2, 2, 2, 0] 
+    # result_player_position_str = '2 2, 3 2, 4 2, 5 2, 6 2, 6 1, 7 1, 8 1, 8 2, 7 2, 7 1, 6 1, 6 2, 6 3, 5 3, 5 4, 6 4, 7 4' 
+    # result_level = 17
+    # actions_stack = Stack()
+    # for i in range(0, len(path_actions), 1):
+    #     actions_stack.push(path_actions[i])
 
     # RUSULT PLAYING:
     print('\nSUCCESS' if success else 'FAILED')
