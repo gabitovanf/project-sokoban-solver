@@ -78,6 +78,12 @@ class ISokobanBoard(AbstractBoard):
     def num_boxes_on_goals(self):
         pass
     
+    def _get_goals_positions(self, target_list: list = None):
+        pass
+    
+    def _get_boxes_positions(self, state_stamp: tuple, target_list: list = None):
+        pass
+    
     def _count_and_update_boxes_and_goals(self) -> dict:
         pass
 

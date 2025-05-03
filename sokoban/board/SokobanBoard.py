@@ -162,6 +162,33 @@ class SokobanBoard(ISokobanBoard, AbstractArrayBoard):
             self._num_boxes = num_boxes
             self._num_goals = num_goals
 
+    def _get_goals_positions(self, target_list: list = None):
+        if target_list is None:
+            target_list = []
+
+        while len(target_list) > 0:
+            target_list.pop()
+
+        for index in range(0, self.size, 1):
+            if self.is_goal(index):
+                target_list.append(index)
+
+        return target_list
+        
+    def _get_boxes_positions(self: ISokobanBoard, state_stamp: tuple, target_list: list = None):
+        elements, _, _, _ = state_stamp
+
+        if target_list is None:
+            target_list = []
+
+        while len(target_list) > 0:
+            target_list.pop()
+
+        for index in range(0, self.size, 1):
+            if self.is_box_element(elements[index]):
+                target_list.append(index)
+                
+        return target_list
     
     # Elements setters
     def _set_element(self, index, value):

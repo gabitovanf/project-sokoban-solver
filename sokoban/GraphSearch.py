@@ -1,3 +1,5 @@
+import time
+
 from structure.queue.Queue import Queue
 from structure.Stack import Stack
 from structure.PriorityInsertStack import PriorityInsertStack
@@ -89,6 +91,10 @@ class GraphSearch:
         max_level: int = 1 << 50,
         heuristic = None
     ):
+        start_time = time.time()
+        ref_num_reached_time = 0
+        ref_num_reached = 100000
+
         if not callable(heuristic):
             heuristic = BoxesToGoalsManhattan.min_manhattan_heuristic
         if search_condition(start_state):
@@ -110,7 +116,11 @@ class GraphSearch:
             for next in graph_instance.get_neighbors(current_state):
                 # validate solution
                 if search_condition(next):
-                    print('NUM REACHED', len(reached), '\n\n')
+                    print(
+                        'NUM REACHED', len(reached), 
+                        '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
+                        '\n\n'
+                    )
                     return next
             
                 previous_total_cost = next.total_cost
@@ -123,13 +133,25 @@ class GraphSearch:
                     reached.add(next)
                     apply_to_reached(next)
 
-                    print('NUM REACHED', len(reached), end='\n', flush=True)
+                    if len(reached) == ref_num_reached:
+                        ref_num_reached_time = time.time() - start_time
+
+                    print(
+                        'NUM REACHED', len(reached), 
+                        '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time), 
+                        end='\n', 
+                        flush=True
+                    )
                     
                 elif previous_total_cost > next.total_cost:
                     frontier.replace_item(previous_total_cost, next.total_cost, next)
 
 
 
-        print('NUM REACHED', len(reached), '\n\n')
+        print(
+            'NUM REACHED', len(reached), 
+            '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
+            '\n\n'
+        )
         return None
 

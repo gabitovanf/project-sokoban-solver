@@ -12,33 +12,27 @@ class BoxesToGoalsManhattan:
 
 
     def simple_manhattan_heuristic(self, state_node) -> int:
-        elements, _, _, _ = state_node.state_stamp
-        goals_positions, boxes_positions = self._get_positions(elements)
+        goals_positions, boxes_positions = self._get_positions(state_node)
 
         return BoxesToGoalsManhattan._get_simple_manhattan(self._board, boxes_positions, goals_positions)
 
 
     def min_manhattan_heuristic(self, state_node) -> int:
-        elements, _, _, _ = state_node.state_stamp
-        goals_positions, boxes_positions = self._get_positions(elements)
+        goals_positions, boxes_positions = self._get_positions(state_node)
 
         return BoxesToGoalsManhattan._get_minimum_manhattan(self._board, boxes_positions, goals_positions)
 
 
-    def _get_positions(self, elements) -> tuple:
+    def _get_positions(self, state_node) -> tuple:
         if len(self._goals_positions) < 1:
-            BoxesToGoalsManhattan._update_goals_positions(self._board, self._goals_positions)
+            self._goals_positions = BoxesToGoalsManhattan._update_goals_positions(self._board, self._goals_positions)
 
         if len(self._goals_positions) < 1:
             return 0
 
-        boxes_positions = self._boxes_positions
-        while len(boxes_positions) > 0:
-            boxes_positions.pop()
+        self._boxes_positions = BoxesToGoalsManhattan._update_boxes_positions(self._board, state_node, self._boxes_positions)
 
-        BoxesToGoalsManhattan._update_boxes_positions(self._board, elements, boxes_positions)
-
-        return self._goals_positions, boxes_positions
+        return self._goals_positions, self._boxes_positions
 
 
     @staticmethod
@@ -84,20 +78,10 @@ class BoxesToGoalsManhattan:
 
     @staticmethod
     def _update_goals_positions(board: ISokobanBoard, target_list: list):
-        while len(target_list) > 0:
-            target_list.pop()
-
-        for index in range(0, board.size, 1):
-            if board.is_goal(index):
-                target_list.append(index)
+        return board._get_goals_positions(target_list)
         
 
     @staticmethod
-    def _update_boxes_positions(board: ISokobanBoard, elements: list, target_list: list):
-        while len(target_list) > 0:
-            target_list.pop()
-
-        for index in range(0, board.size, 1):
-            if board.is_box_element(elements[index]):
-                target_list.append(index)
+    def _update_boxes_positions(board: ISokobanBoard, state_node: BoardStateNode, target_list: list):
+        return board._get_boxes_positions(state_node.state_stamp, target_list)
 
