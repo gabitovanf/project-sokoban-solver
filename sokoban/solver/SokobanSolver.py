@@ -1,3 +1,4 @@
+import sys
 from structure.Stack import Stack
 from structure.queue.Queue import Queue
 from sokoban.GraphSearch import GraphSearch
@@ -19,7 +20,7 @@ class SokobanSolver():
 
         self._graph = None
 
-    def BFS(self, board: SokobanBoard, max_levels: int = 15, save_graph_nodes = True):
+    def BFS(self, board: SokobanBoard, depth_limit: int = sys.maxsize, save_graph_nodes = True):
         graph = SokobanGraph(board) if save_graph_nodes else SokobanGraphNodeGenerator(board)
         self._graph = graph
 
@@ -27,28 +28,28 @@ class SokobanSolver():
             graph, 
             graph.root, 
             lambda x: False, 
-            lambda node: board.is_solution(node.state_stamp) or node.level > max_levels
+            lambda node: board.is_solution(node.state_stamp) or node.level > depth_limit
         )
 
-        return self._get_result_tuple(board, final_node, max_levels)
+        return self._get_result_tuple(board, final_node, depth_limit)
 
-    def DFS_first_node_met(self, board: SokobanBoard, max_levels: int = 15, save_graph_nodes = True):
+    def DFS_first_node_met(self, board: SokobanBoard, depth_limit: int = sys.maxsize, save_graph_nodes = True):
         return self._DFS(
             board, 
-            max_levels, 
+            depth_limit, 
             save_graph_nodes=save_graph_nodes, 
             search_minimum=False
         )
     
-    def DFS(self, board: SokobanBoard, max_levels: int = 15, save_graph_nodes = True):
+    def DFS(self, board: SokobanBoard, depth_limit: int = sys.maxsize, save_graph_nodes = True):
         return self._DFS(
             board, 
-            max_levels, 
+            depth_limit, 
             save_graph_nodes=save_graph_nodes, 
             search_minimum=True
         )
     
-    def _DFS(self, board: SokobanBoard, max_levels: int = 15, save_graph_nodes: bool = True, search_minimum: bool = False):
+    def _DFS(self, board: SokobanBoard, depth_limit: int = sys.maxsize, save_graph_nodes: bool = True, search_minimum: bool = False):
         graph = SokobanGraph(board) if save_graph_nodes else SokobanGraphNodeGenerator(board)
         self._graph = graph
 
@@ -57,13 +58,13 @@ class SokobanSolver():
             graph.root, 
             lambda x: False, 
             lambda node: board.is_solution(node.state_stamp),
-            max_level=max_levels,
+            depth_limit=depth_limit,
             search_minimum=search_minimum
         )
 
-        return self._get_result_tuple(board, final_node, max_levels)
+        return self._get_result_tuple(board, final_node, depth_limit)
  
-    def A_star(self, board: SokobanBoard, max_levels: int = 15, save_graph_nodes: bool = True, heuristic=None):
+    def A_star(self, board: SokobanBoard, depth_limit: int = sys.maxsize, save_graph_nodes: bool = True, heuristic=None):
         graph = SokobanGraph(board) if save_graph_nodes else SokobanGraphNodeGenerator(board)
         self._graph = graph
 
@@ -74,13 +75,54 @@ class SokobanSolver():
             graph.root, 
             lambda x: False, 
             lambda node: board.is_solution(node.state_stamp),
-            max_level=max_levels,
+            depth_limit=depth_limit,
             heuristic=heuristic_function
         )
 
         print('IS SOLUTION', board.is_solution(final_node.state_stamp), final_node.state_stamp)
 
-        return self._get_result_tuple(board, final_node, max_levels)
+        return self._get_result_tuple(board, final_node, depth_limit)
+ 
+    def IDA_star(
+            self,
+            board: SokobanBoard, 
+            start_depth_limit: int = 15, 
+            increment_depth_limit: int = 10, 
+            max_depth_limit: int = sys.maxsize, 
+            save_graph_nodes: bool = True, 
+            heuristic=None
+        ):
+        graph = SokobanGraph(board) if save_graph_nodes else SokobanGraphNodeGenerator(board)
+        self._graph = graph
+
+        heuristic_function = SokobanSolver._get_heuristic(board, heuristic)
+
+        final_node = None
+        solved = False
+        depth_limit = start_depth_limit
+
+        while not solved:
+            final_node = GraphSearch.A_star(
+                graph, 
+                graph.root, 
+                lambda x: False, 
+                lambda node: board.is_solution(node.state_stamp),
+                depth_limit=depth_limit,
+                heuristic=heuristic_function
+            )
+            solved = board.is_solution(final_node.state_stamp)
+            depth_limit += increment_depth_limit
+
+            if depth_limit > max_depth_limit:
+                break
+
+        if not final_node:
+            print('NO NODE FOUND')
+
+        print('IS SOLUTION', board.is_solution(final_node.state_stamp), final_node.state_stamp)
+        print('Depth limit:', depth_limit, 'of {start} + i * {delta}\n\n'.format(start=start_depth_limit, delta= increment_depth_limit))
+
+        return self._get_result_tuple(board, final_node, depth_limit)
     
     @staticmethod
     def _get_heuristic(board: SokobanBoard, heuristic=None):
@@ -136,15 +178,15 @@ class SokobanSolver():
 
         return result_action_stack, result_player_position_str
     
-    def _get_result_tuple(self, board: SokobanBoard, final_node: BoardStateNode, max_levels: int) -> tuple:
+    def _get_result_tuple(self, board: SokobanBoard, final_node: BoardStateNode, depth_limit: int) -> tuple:
         if final_node is None:
-            return False, Stack(), '', max_levels
+            return False, Stack(), '', depth_limit
         
         result = (self._result_from_records(board, final_node.path_actions, final_node.path_state_stamps) 
                   if final_node.has_path_records 
                   else self._reconstruct_result_from_node(board, final_node))
         
-        if final_node.level > max_levels and not board.is_solution(final_node.state_stamp):
+        if final_node.level > depth_limit and not board.is_solution(final_node.state_stamp):
             return (False,) + result + (final_node.level,)
 
         return (True,) + result + (final_node.level,)

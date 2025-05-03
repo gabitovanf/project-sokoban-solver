@@ -31,6 +31,7 @@ from structure.Stack import Stack
 #     '#-------.#',
 #     '##########'
 # ])
+
 # SIMPLE I. ONE BOX
 # level_str = '\n'.join([
 #     '##########',
@@ -40,6 +41,7 @@ from structure.Stack import Stack
 #     '#-------.#',
 #     '##########'
 # ])
+
 # SIMPLE II. ONE BOX
 # level_str = '\n'.join([
 #     '##########',
@@ -49,6 +51,7 @@ from structure.Stack import Stack
 #     '#------#.#',
 #     '##########'
 # ])
+
 # SIMPLE III.v1. ONE BOX
 # BFS failed - 15 attempt levels
 # DFS failed - 15 attempt levels
@@ -56,18 +59,20 @@ from structure.Stack import Stack
 # A_star + simple manhattan + "mid player to boxes" heuristic - 17 attempt levels, NUM REACHED 161438, TIME ELAPSED 200.00371408462524
 # -- result: [2, 2, -1, -2, -1, -1, -2, 1, -2, -1, 2, 2, 1, 2, 2, 2, 2, 0] 2 2, 3 2, 4 2, 5 2, 6 2, 6 1, 7 1, 8 1, 8 2, 7 2, 7 1, 6 1, 6 2, 6 3, 5 3, 5 4, 6 4, 7 4
 # A_star + minimum manhattan + "mid player to boxes" heuristic - 17 attempt levels, NUM REACHED 161438, TIME ELAPSED 208.52746438980103
-level_str = '\n'.join([
-    '##########',
-    '#--------#',
-    '#-@----$-#',
-    '#------###',
-    '#-------.#',
-    '##########'
-])
+# level_str = '\n'.join([
+#     '##########',
+#     '#--------#',
+#     '#-@----$-#',
+#     '#------###',
+#     '#-------.#',
+#     '##########'
+# ])
+
 # SIMPLE III.v2. ONE BOX
 # BFS succeeded - 10 attempt levels
 # DFS succeeded - 14 attempt levels
 # A_star succeeded - 10 attempt levels, NUM REACHED 1166
+# IDA_star succeeded - 10 attempt levels, NUM REACHED 766, TIME ELAPSED 0.08143186569213867, Depth limit: 20 of 10 + i * 10
 # level_str = '\n'.join([
 #     '##########',
 #     '#-------@#',
@@ -76,16 +81,18 @@ level_str = '\n'.join([
 #     '#-------.#',
 #     '##########'
 # ])
+
 # SIMPLE III.v3. ONE BOX
 # A_star succeeded - 13 attempt levels, NUM REACHED 28198 (до отладки простой эвристики 61857; простая и минимальная эвристики одинаковые для одной коробки)
-# level_str = '\n'.join([
-#     '##########',
-#     '#----@---#',
-#     '#------$-#',
-#     '#------###',
-#     '#-------.#',
-#     '##########'
-# ])
+level_str = '\n'.join([
+    '##########',
+    '#----@---#',
+    '#------$-#',
+    '#------###',
+    '#-------.#',
+    '##########'
+])
+
 # SIMPLE. IV.v1. TOW BOXS
 # BFS failed - 15 attempt levels
 # A_star + simple manhattan heuristic succeeded - 15 attempt levels, NUM REACHED 13114, TIME ELAPSED 2.428982973098755
@@ -103,16 +110,18 @@ level_str = '\n'.join([
 #     '#-------.#',
 #     '##########'
 # ])
+
 # SIMPLE. IV.v2. TOW BOXS
-level_str = '\n'.join([
-    '##########',
-    '#--------#',
-    '#------$-#',
-    '#-@----###',
-    '#--$----.#',
-    '#-------.#',
-    '##########'
-])
+# Not solved yet
+# level_str = '\n'.join([
+#     '##########',
+#     '#--------#',
+#     '#------$-#',
+#     '#-@----###',
+#     '#--$----.#',
+#     '#-------.#',
+#     '##########'
+# ])
 test_player_moves = '1 1, 1 2, 2 2, 2 3, 3 3, 3 4, 4 4'
 
 def main():
@@ -146,30 +155,50 @@ def main():
     start_time = time.time()
 
     # SOLVER OPTIONS:
-    # success, actions_stack, result_player_position_str, result_level = solver.BFS(board_sokoban)
+    # success, actions_stack, result_player_position_str, result_level = solver.BFS(board_sokoban, 15)
     # success, actions_stack, result_player_position_str, result_level = solver.DFS_first_node_met(board_sokoban, 20)
     # success, actions_stack, result_player_position_str, result_level = solver.DFS(board_sokoban, 20)
+
+    # A*:
     # success, actions_stack, result_player_position_str, result_level = solver.A_star(
     #     board_sokoban, 
     #     20, 
     #     save_graph_nodes=False,
     #     heuristic=SokobanSolver.HEURISTIC_SIMPLE_MANHATTAN
     # )
-    # success, actions_stack, result_player_position_str, result_level = solver.A_star(
-    #     board_sokoban, 
-    #     30, 
-    #     save_graph_nodes=False,
-    #     heuristic=SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN
-    # )
     success, actions_stack, result_player_position_str, result_level = solver.A_star(
         board_sokoban, 
-        20, 
+        30, 
         save_graph_nodes=False,
-        heuristic=[SokobanSolver.HEURISTIC_SIMPLE_MANHATTAN, SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN]
+        heuristic=SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN
     )
     # success, actions_stack, result_player_position_str, result_level = solver.A_star(
     #     board_sokoban, 
     #     20, 
+    #     save_graph_nodes=False,
+    #     heuristic=[SokobanSolver.HEURISTIC_SIMPLE_MANHATTAN, SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN]
+    # )
+    # success, actions_stack, result_player_position_str, result_level = solver.A_star(
+    #     board_sokoban, 
+    #     20, 
+    #     save_graph_nodes=False,
+    #     heuristic=[SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN, SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN]
+    # )
+
+    # IDA*:
+    # success, actions_stack, result_player_position_str, result_level = solver.IDA_star(
+    #     board_sokoban, 
+    #     start_depth_limit=10,
+    #     increment_depth_limit=10,
+    #     max_depth_limit=100, 
+    #     save_graph_nodes=False,
+    #     heuristic=SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN
+    # )
+    # success, actions_stack, result_player_position_str, result_level = solver.IDA_star(
+    #     board_sokoban, 
+    #     start_depth_limit=10,
+    #     increment_depth_limit=10,
+    #     max_depth_limit=100, 
     #     save_graph_nodes=False,
     #     heuristic=[SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN, SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN]
     # )
