@@ -31,10 +31,11 @@ class ConsoleBoardView(AbstractBoardView):
 
         w = self._source.width
         h = self._source.height
-        player_position = self._source.player_position
-        output = list(map(lambda elem: self._value_mapper.value_to_view((elem[1], 1 if elem[0] == player_position else 0)), enumerate(self._source.elements)))
-        # append colors to output
+        output = []
 
+        for i in range(0, self._source.size, 1):
+            output.append(self._value_mapper.get_view_at_index(self._source, i))
+            
         line_break_index = len(output) - w
         while line_break_index > 0:
             output.insert(line_break_index, '\n')

@@ -102,7 +102,7 @@ class AbstractBoard(ISearchGraph):
 
         return True
     
-    def _copy_state_from_to(from_board, to_board):
+    def _copy_state_from_to(self, from_board, to_board):
         to_board.player_position = from_board.player_position
 
     @property

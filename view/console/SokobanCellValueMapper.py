@@ -1,4 +1,5 @@
 from view.AbstractValueMapper import AbstractValueMapper
+from view.AbstractBoardData import AbstractBoardData
 
 
 class SokobanCellValueMapper(AbstractValueMapper):
@@ -33,3 +34,9 @@ class SokobanCellValueMapper(AbstractValueMapper):
 
         # add some space with ' ' 
         return symbols[player_is_on] + ' '
+    
+    def get_view_at_index(self, source: AbstractBoardData, index):
+        return self.value_to_view((
+            source.elements[index], 
+            1 if index == source.player_position else 0
+        ))

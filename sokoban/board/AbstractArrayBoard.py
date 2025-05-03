@@ -1,5 +1,3 @@
-import json
-from sokoban.utils.UrlStringEncoder import UrlStringEncoder
 from sokoban.board.AbstractBoard import AbstractBoard
 
 class AbstractArrayBoard(AbstractBoard):
@@ -21,27 +19,4 @@ class AbstractArrayBoard(AbstractBoard):
         for (i, elem) in enumerate(from_board._elements):
             to_board._elements[i] = elem
     
-    def get_state_stamp(self):
-        return self._elements.copy(), self._player_position, self._move_id, self._move_level
-    
-    def restore_state_from_stamp(self, state_tuple):
-        elements, player_postion, move_id, move_level = state_tuple
-
-        if self._move_id == move_id:
-            # print('DO NOT CHANGE BOARD. MOVE ID:', move_id)
-            return
-
-        self._player_position = player_postion
-        for (index, item) in enumerate(elements):
-            self._elements[index] = item
-
-        # Helper
-        self._move_id = move_id
-        # Statistics
-        self._move_level = move_level
-
-    def _get_next_move_id(self):
-        self._last_move_id += 1
-
-        return self._last_move_id
     
