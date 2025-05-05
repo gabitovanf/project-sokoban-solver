@@ -1,8 +1,8 @@
 import sys
 import colorama
 from view.AbstractBoardView import AbstractBoardView
-from view.AbstractBoardData import AbstractBoardData
-from view.AbstractValueMapper import AbstractValueMapper
+from view.IBoardData import IBoardData
+from view.IValueMapper import IValueMapper
 
 colorama.init()
 
@@ -20,11 +20,8 @@ class ConsoleBoardView(AbstractBoardView):
 
     REST_COLORS_CMD = '\x1b[0m'
 
-    def __init__(self, source: AbstractBoardData, value_mapper: AbstractValueMapper=None, *args, **kwargs):
-        kwargs['value_mapper'] = value_mapper
-        super(ConsoleBoardView, self).__init__(source, *args, **kwargs)
-
-        self._value_mapper = value_mapper
+    def __init__(self, source: IBoardData, value_mapper: IValueMapper=None, *args, **kwargs):
+        super(ConsoleBoardView, self).__init__(source, value_mapper=value_mapper, *args, **kwargs)
 
     def render(self):
         # The size of the board must not change!

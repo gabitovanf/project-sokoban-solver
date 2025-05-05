@@ -1,6 +1,6 @@
-from view.AbstractBoardData import AbstractBoardData
+from view.IBoardData import IBoardData
 
-class BoardViewTesterData(AbstractBoardData):
+class BoardViewTesterData(IBoardData):
     def __init__(self, width: int, height: int):
         length = width * height
         self._width = width

@@ -1,5 +1,5 @@
 from sokoban.board.SokobanBoard import SokobanBoard
-from sokoban.control.modes.SokobanSinglePlayerMode import SokobanSinglePlayerMode
+from sokoban.control.modes.SokobanPlayerPositionMode import SokobanPlayerPositionMode
 from sokoban.control.modes.SokobanActionMode import SokobanActionMode
 from sokoban.control.AbstractSequencePlayer import AbstractSequencePlayer
 
@@ -12,7 +12,7 @@ class SokobanMoveSequencePlayer(AbstractSequencePlayer):
         super().__init__()
         self._board = board
         self._mode = SokobanMoveSequencePlayer.MODE_SINGLE_AGENT_POSITION
-        self._mode_helper = SokobanSinglePlayerMode(self, self._board)
+        self._mode_helper = SokobanPlayerPositionMode(self, self._board)
 
     def play(self, record, mode: str = 'single'):
         super(SokobanMoveSequencePlayer, self).play(record)
@@ -22,7 +22,7 @@ class SokobanMoveSequencePlayer(AbstractSequencePlayer):
             self._mode = mode
 
             if mode == SokobanMoveSequencePlayer.MODE_SINGLE_AGENT_POSITION:
-                self._mode_helper = SokobanSinglePlayerMode(self, self._board)
+                self._mode_helper = SokobanPlayerPositionMode(self, self._board)
 
             elif mode == SokobanMoveSequencePlayer.MODE_ACTION:
                 self._mode_helper = SokobanActionMode(self, self._board)

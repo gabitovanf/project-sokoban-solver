@@ -1,10 +1,12 @@
+from sokoban.control.modes.IPlayerMode import IPlayerMode
 from sokoban.control.AbstractSequencePlayer import AbstractSequencePlayer
-from sokoban.board.SokobanBoard import SokobanBoard
+from sokoban.board.ISokobanBoard import ISokobanBoard
 from sokoban.board.MoveDirection import MoveDirection
 
 
-class SokobanActionMode:
-    def __init__(self, player: AbstractSequencePlayer, board: SokobanBoard):
+class SokobanActionMode(IPlayerMode):
+    def __init__(self, player: AbstractSequencePlayer, board: ISokobanBoard):
+        super().__init__(player, board)
         self._player = player
         self._board = board
 

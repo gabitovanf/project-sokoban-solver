@@ -3,11 +3,11 @@ import time
 
 from view.console.ConsoleBoardView import ConsoleBoardView
 from view.console.SokobanCellValueAndStateMapper import SokobanCellValueAndStateMapper
-from view.console.SokobanBoardElementMapper import SokobanBoardElementMapper
+from view.console.BoardElementToSymbolMapper import BoardElementToSymbolMapper
 from view.helper.BoardViewTesterData import BoardViewTesterData
 from utils.Ticker import Ticker
 from sokoban.board.SokobanBoard import SokobanBoard
-from sokoban.board.SokobanIntMasksBoard import SokobanIntMasksBoard
+from sokoban.board.SokobanBitMasksBoard import SokobanBitMasksBoard
 from sokoban.board.CreateSokobanBoard import create_from_str, create_from_json_encoded
 from sokoban.board.MoveDirection import MoveDirection
 from sokoban.solver.SokobanSolver import SokobanSolver
@@ -37,6 +37,8 @@ from structure.Stack import Stack
 # ])
 
 # SIMPLE I. ONE BOX
+# All are fast except current version of:
+# IDA_star + minimum manhattan "including player" heuristic ? - 13 attempt levels, NUM REACHED 46732, TIME ELAPSED 20.3073468208313, Depth limit (total cost): 25 of 25 + i * 10
 # level_str = '\n'.join([
 #     '##########',
 #     '#--------#',
@@ -92,6 +94,7 @@ from structure.Stack import Stack
 # A_star succeeded - 13 attempt levels, NUM REACHED 28198 
 # (до отладки простой эвристики 61857; простая и минимальная эвристики одинаковые для одной коробки)
 # IDA_star succeeded - 13 attempt levels, NUM REACHED 28198, TIME ELAPSED 7.424437046051025, Depth limit (total cost): 20 of 10 + i * 10
+# IDA_star + minimum manhattan "including player" heuristic ? - 13 attempt levels, NUM REACHED -, TIME ELAPSED -, Depth limit (total cost): -
 # level_str = '\n'.join([
 #     '##########',
 #     '#----@---#',
@@ -113,14 +116,29 @@ from structure.Stack import Stack
 
 # IDA_star + minimum manhattan heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 7298, TIME ELAPSED 1.2707240581512451, Depth limit: 20 of 10 + i * 10
 # IDA_star + minimum manhattan + "mid player to free boxes" heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 1059, TIME ELAPSED 0.15013885498046875, Depth limit: 20 of 10 + i * 10
-level_str = '\n'.join([
-    '##########',
-    '#--------#',
-    '#-@----$-#',
-    '#--$----.#',
-    '#-------.#',
-    '##########'
-])
+
+# IDA_star + minimum manhattan "including player" (min) heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 48028, TIME ELAPSED 13.2410409450531, Depth limit: 25 of 25 + i * 10
+# IDA_star + minimum manhattan "including player" (min) heuristic succeeded + Bit Board - 15 attempt levels, NUM REACHED 48310, TIME ELAPSED 13.874258041381836, Depth limit: 30 of 10 + i * 10
+# level_str = '\n'.join([
+#     '##########',
+#     '#--------#',
+#     '#-@----$-#',
+#     '#--$----.#',
+#     '#-------.#',
+#     '##########'
+# ])
+
+# SIMPLE. IV.v1. THREE BOXS
+# A_star + minimum manhattan + "mid player to free boxes" heuristic succeeded + Bit Board - 20 attempt levels, NUM REACHED 15068, TIME ELAPSED 3.6071648597717285
+# IDA_star + minimum manhattan + "mid player to free boxes" heuristic succeeded + Bit Board - 20 attempt levels, NUM REACHED 15068, TIME ELAPSED 3.687546730041504, Depth limit: 30 of 30 + i * 15
+# level_str = '\n'.join([
+#     '##########',
+#     '#----.---#',
+#     '#-@----$-#',
+#     '#--$-$--.#',
+#     '#-------.#',
+#     '##########'
+# ])
 
 # SIMPLE. IV.v2. TOW BOXS
 # Not solved yet
@@ -133,6 +151,46 @@ level_str = '\n'.join([
 #     '#-------.#',
 #     '##########'
 # ])
+# SIMPLE. IV.v3. TOW BOXS
+level_str = '\n'.join([
+    '##########',
+    '#------@-#',
+    '#------$-#',
+    '#------###',
+    '#--$----.#',
+    '#-------.#',
+    '##########'
+])
+
+# SIMPLE. IV.v4. TOW BOXS
+# IDA_star + minimum manhattan + "mid player to free boxes" heuristic succeeded - LEVEL 36, NUM REACHED 120178, TIME ELAPSED 75.82123517990112, Depth limit: 45 of 30 + i * 15
+# IDA_star + minimum manhattan "including player" (min) heuristic ? - LEVEL 36, NUM REACHED -, TIME ELAPSED -, Depth limit: -
+# level_str = '\n'.join([
+#     '####################',
+#     '#------------------#',
+#     '#--$-------------$-#',
+#     '#-----------------.#',
+#     '#--------@--------.#',
+#     '####################'
+# ])
+
+# SIMPLE. IV.v4. TOW BOXS
+# Not solved yet
+
+# IDA_star + minimum manhattan heuristic - блуждает где-то вдали от box, т.к. heuristic подолгу не меняется (31-32)
+# В конце долго вообще ничего не меняется: total 44, path 13, heuristic 31 
+# ('TOTAL COST 44 13 31' на этапе генерации соседей, box на стартовых позииях или аналогичных) 
+# - тоже блуждания? - какие-то скопления нод с одинаковым path-cost (12) и без движений box
+
+# IDA_star + minimum manhattan + "mid player to free boxes" heuristic - TOO LONG YET
+# level_str = '\n'.join([
+#     '####################',
+#     '#------------------#',
+#     '#--$-$-------------#',
+#     '#-----------------.#',
+#     '#--------@--------.#',
+#     '####################'
+# ])
 test_player_moves = '1 1, 1 2, 2 2, 2 3, 3 3, 3 4, 4 4'
 
 def main():
@@ -141,8 +199,8 @@ def main():
     # BOARD OPTIONS:
     # board_sokoban = create_from_json_encoded(level_json_str, SokobanBoard)
     # board_sokoban = create_from_str(level_str, SokobanBoard)
-    # board_sokoban = create_from_json_encoded(level_json_str, SokobanIntMasksBoard)
-    board_sokoban = create_from_str(level_str, SokobanIntMasksBoard)
+    # board_sokoban = create_from_json_encoded(level_json_str, SokobanBitMasksBoard)
+    board_sokoban = create_from_str(level_str, SokobanBitMasksBoard)
 
     if isinstance(board_sokoban, str):
         print(board_sokoban)
@@ -154,7 +212,7 @@ def main():
     # - array board
     # board_view = ConsoleBoardView(board_sokoban, SokobanCellValueAndStateMapper())
     # - bit operator board
-    board_view = ConsoleBoardView(board_sokoban, SokobanBoardElementMapper(board_sokoban))
+    board_view = ConsoleBoardView(board_sokoban, BoardElementToSymbolMapper(board_sokoban))
 
     ticker = Ticker(5, True)
     solver = SokobanSolver()
@@ -205,14 +263,48 @@ def main():
     #     save_graph_nodes=False,
     #     heuristic=SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN
     # )
+    # success, actions_stack, result_player_position_str, result_level = solver.IDA_star(
+    #     board_sokoban, 
+    #     start_depth_limit=10,
+    #     increment_depth_limit=10,
+    #     max_depth_limit=100, 
+    #     save_graph_nodes=False,
+    #     heuristic=[SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN, SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN]
+    # )
+    # success, actions_stack, result_player_position_str, result_level = solver.IDA_star(
+    #     board_sokoban, 
+    #     start_depth_limit=10,
+    #     increment_depth_limit=10,
+    #     max_depth_limit=100, 
+    #     save_graph_nodes=False,
+    #     heuristic=SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN_INCLUDING_PLAYER
+    # )
+
+    # BIGGER MAZE
+    # success, actions_stack, result_player_position_str, result_level = solver.IDA_star(
+    #     board_sokoban, 
+    #     start_depth_limit=30,
+    #     increment_depth_limit=15,
+    #     max_depth_limit=100, 
+    #     save_graph_nodes=False,
+    #     heuristic=SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN
+    # )
     success, actions_stack, result_player_position_str, result_level = solver.IDA_star(
         board_sokoban, 
-        start_depth_limit=10,
-        increment_depth_limit=10,
+        start_depth_limit=30,
+        increment_depth_limit=15,
         max_depth_limit=100, 
         save_graph_nodes=False,
         heuristic=[SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN, SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN]
     )
+    # success, actions_stack, result_player_position_str, result_level = solver.IDA_star(
+    #     board_sokoban, 
+    #     start_depth_limit=30,
+    #     increment_depth_limit=15,
+    #     max_depth_limit=100, 
+    #     save_graph_nodes=False,
+    #     heuristic=SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN_INCLUDING_PLAYER
+    # )
 
     ## AFTER SOLVER >> 
     time_elapsed = time.time() - start_time

@@ -120,19 +120,19 @@ class GraphSearch:
         while not frontier.is_empty:
             current_state, current_level = frontier.pop()
 
+            # validate solution
+            if search_condition(current_state):
+                print(
+                    'NUM REACHED', len(reached), 
+                    # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
+                    '\n\n'
+                )
+                return current_state, get_metrics()
+
             if current_level >= depth_limit:
                 continue
 
             for next in graph_instance.get_neighbors(current_state):
-                # validate solution
-                if search_condition(next):
-                    print(
-                        'NUM REACHED', len(reached), 
-                        # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
-                        '\n\n'
-                    )
-                    return next, get_metrics()
-            
                 previous_total_cost = next.total_cost
                 next.total_cost = next.path_cost + heuristic(next)
                 # Uncomment to check a factor of total cost
@@ -235,19 +235,20 @@ class GraphSearch:
         while not frontier.is_empty:
             current_state, current_level = frontier.pop()
 
+            print('CURRENT: COST', current_state.total_cost, current_state.path_cost, current_state.total_cost - current_state.path_cost)
+            # validate solution
+            if search_condition(current_state):
+                print(
+                    'NUM REACHED', len(reached), 
+                    # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
+                    '\n\n'
+                )
+                return current_state, get_metrics()
+
             if current_state.total_cost >= depth_limit:
-                continue
+                continue   
 
             for next in graph_instance.get_neighbors(current_state):
-                # validate solution
-                if search_condition(next):
-                    print(
-                        'NUM REACHED', len(reached), 
-                        # '\nREF {num} REACHED AT {time}'.format(num=ref_num_reached, time=ref_num_reached_time),
-                        '\n\n'
-                    )
-                    return next, get_metrics()
-            
                 previous_total_cost = next.total_cost
                 next.total_cost = next.path_cost + heuristic(next)
                 # Uncomment to check a factor of total cost

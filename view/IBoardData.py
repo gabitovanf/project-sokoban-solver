@@ -1,4 +1,4 @@
-class AbstractBoardData:
+class IBoardData:
     def __init__(self):
         pass
 

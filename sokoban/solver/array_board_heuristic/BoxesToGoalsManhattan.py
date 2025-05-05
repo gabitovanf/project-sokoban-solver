@@ -49,6 +49,46 @@ class BoxesToGoalsManhattan:
         boxes_positions = self._board._get_boxes_not_on_goals_positions(state_node.state_stamp)
 
         return BoxesToGoalsManhattan._get_mid_to_position(self._board, boxes_positions, player_position)
+    
+    
+    def min_manhattan_include_player_heuristic(self, state_node, positions_updated=None) -> int:
+        goals_positions, boxes_positions = self._get_positions(state_node) if positions_updated is None else positions_updated
+        _, player_position, _, _ = state_node.state_stamp
+        player_x = self._board.element_x(player_position)
+        player_y = self._board.element_y(player_position)
+
+        min_combination_list = BoxesToGoalsManhattan._get_minimum_manhattan_combination(self._board, boxes_positions, goals_positions)
+
+        boxes_positions = self._board._get_boxes_not_on_goals_positions(state_node.state_stamp)
+        
+        sum = 0
+        min_to_player = self._board.size
+        exclude_min_to_goal = 0
+        for i in range(0, len(min_combination_list), 1):
+            # Starts from min manhattan for boxes and goals
+            # Add player to closest free box 
+            # and Add the rest min manhattan for boxes and goals (add twice and substract closest)
+            
+            sum += min_combination_list[i][2]
+
+            if min_combination_list[i][2] == 0:
+                continue
+
+            x = self._board.element_x(min_combination_list[i][0])
+            y = self._board.element_y(min_combination_list[i][0])
+
+            manhattan = abs(x - player_x) + abs(y - player_y)
+            if manhattan < min_to_player:
+                min_to_player = manhattan
+                exclude_min_to_goal = min_combination_list[i][2]
+
+        if sum == 0:
+            return sum
+
+        sum += sum - exclude_min_to_goal
+        sum += min_to_player
+
+        return sum
 
 
     def _get_positions(self, state_node) -> tuple:
@@ -102,10 +142,45 @@ class BoxesToGoalsManhattan:
             sum += result_list[i][2]
 
         return sum
+
+    @staticmethod
+    def _get_minimum_manhattan_combination(board: ISokobanBoard, from_positions: list, to_positions: list) -> int:
+        # Fill Matrix
+        mx = ListMatrix(len(from_positions), len(to_positions))
+        for i in range(0, len(from_positions), 1):
+            p_i = from_positions[i]
+            for j in range(0, len(to_positions), 1):
+                p_j = to_positions[j]
+                manhattan = abs(board.element_x(p_j) - board.element_x(p_i)) + abs(board.element_y(p_j) - board.element_y(p_i))
+                mx.set(i, j, manhattan)
+
+        # print(mx)
+        # Find minimum sun
+        result_list = AssignmentProblem.HungarianAlgorithm(mx)
+        # print(result_list)
+
+        return result_list
+
+
+    @staticmethod
+    def _get_minimum_manhattan(board: ISokobanBoard, from_positions: list, to_positions: list) -> int:
+        sum = 0
+
+        # Find minimum sun
+        result_list = BoxesToGoalsManhattan._get_minimum_manhattan_combination(board, from_positions, to_positions)
+        # print(result_list)
+
+        sum = 0
+        for i in range(0, len(result_list), 1):
+            sum += result_list[i][2]
+
+        return sum
     
 
     @staticmethod
     def _get_mid_to_position(board: ISokobanBoard, from_positions: list, to_position: int) -> int:
+        if len(from_positions) < 1: return 0
+        
         sum = 0
         
         for i in range(0, len(from_positions), 1):

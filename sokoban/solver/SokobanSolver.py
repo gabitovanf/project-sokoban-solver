@@ -13,6 +13,7 @@ from sokoban.solver.array_board_heuristic.BoxesToGoalsManhattan import BoxesToGo
 class SokobanSolver():
     HEURISTIC_SIMPLE_MANHATTAN = 'HEURISTIC_SIMPLE_MANHATTAN'
     HEURISTIC_MINIMUM_MANHATTAN = 'HEURISTIC_MINIMUM_MANHATTAN'
+    HEURISTIC_MINIMUM_MANHATTAN_INCLUDING_PLAYER = 'HEURISTIC_MINIMUM_MANHATTAN_INCLUDING_PLAYER'
     HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN = 'HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN'
 
     def __init__(self):
@@ -134,6 +135,9 @@ class SokobanSolver():
         elif heuristic == SokobanSolver.HEURISTIC_MID_PLAYER_TO_BOXES_MANHATTAN:
             # heuristic_function = heuristic_instance.mid_player_to_boxes_manhattan_heuristic
             heuristic_function = heuristic_instance.mid_player_to_free_boxes_manhattan_heuristic
+
+        elif heuristic == SokobanSolver.HEURISTIC_MINIMUM_MANHATTAN_INCLUDING_PLAYER:
+            heuristic_function = heuristic_instance.min_manhattan_include_player_heuristic
 
         return heuristic_function
 

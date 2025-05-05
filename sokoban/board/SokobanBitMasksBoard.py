@@ -3,7 +3,7 @@ from utility_algorithms.BitCount import BitCount
 from sokoban.board.MoveDirection import MoveDirection
 
 
-class SokobanIntMasksBoard(ISokobanBoard):
+class SokobanBitMasksBoard(ISokobanBoard):
     def __init__(self, width, height):
         super().__init__(width, height, 0)
 
@@ -48,9 +48,9 @@ class SokobanIntMasksBoard(ISokobanBoard):
 
     def _count_and_update_boxes_and_goals(self, count_box_on_goal_only = False):
         stamp_masks = (self._mask_box, self._mask_goal, self._mask_active)
-        self._num_boxes_on_goals = SokobanIntMasksBoard._get_num_boxes_on_goals(stamp_masks)
+        self._num_boxes_on_goals = SokobanBitMasksBoard._get_num_boxes_on_goals(stamp_masks)
         if count_box_on_goal_only:
-            self._num_boxes = SokobanIntMasksBoard._get_num_boxes(stamp_masks)
+            self._num_boxes = SokobanBitMasksBoard._get_num_boxes(stamp_masks)
             self._num_goals = BitCount.popcount(self._mask_goal)
 
     @staticmethod
